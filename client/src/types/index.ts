@@ -8,11 +8,12 @@ export type DeviceCategory =
 	| "other";
 
 export interface IDevice {
+	_id?: string;
 	name: string;
 	category: DeviceCategory;
 	brand?: string;
 	specifications: Record<string, any>;
 	rating?: number;
-	createdAt?: Date;
-	updatedAt?: Date;
+	createdAt?: string;
+	updatedAt?: string;
 }
