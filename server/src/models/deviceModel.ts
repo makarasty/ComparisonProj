@@ -1,24 +1,74 @@
 import { Schema, model, Document } from "mongoose";
-import { IDevice } from "../interfaces/Device";
+import { IProduct } from "../interfaces/Product";
 
-interface DeviceDocument extends IDevice, Document {}
+interface DeviceDocument extends IProduct, Document {}
 
 const deviceSchema = new Schema<DeviceDocument>(
 	{
-		name: { type: String, required: true },
-		category: { type: String, required: true, index: true },
-		brand: { type: String, default: "" },
+		title: {
+			type: String,
+			default: "Unknown",
+		},
+		description: {
+			type: String,
+			required: true,
+		},
+		price: {
+			type: Number,
+			required: true,
+			index: true,
+			min: 0,
+		},
+		brand: {
+			type: String,
+			default: "Unknown",
+		},
+		category: {
+			type: String,
+			default: "other",
+		},
+		image: {
+			type: String,
+			required: true,
+		},
+		rating: {
+			type: Number,
+			min: 0,
+			max: 5,
+			default: 0,
+		},
+		stock: {
+			type: Number,
+			min: 0,
+			default: 0,
+		},
+		dimensions: {
+			width: {
+				type: Number,
+				min: 0,
+			},
+			height: {
+				type: Number,
+				min: 0,
+			},
+			depth: {
+				type: Number,
+				min: 0,
+			},
+		},
 		specifications: {
-			type: Object,
+			type: Schema.Types.Mixed,
 			default: {},
 		},
-		rating: { type: Number, default: 0, index: true },
 	},
 	{
 		timestamps: true,
+		versionKey: false,
 	},
 );
 
-deviceSchema.index({ "specifications.price": 1 });
+deviceSchema.index({ price: 1 });
+deviceSchema.index({ brand: 1 });
+deviceSchema.index({ category: 1 });
 
 export default model<DeviceDocument>("Device", deviceSchema);

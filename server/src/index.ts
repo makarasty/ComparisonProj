@@ -4,7 +4,6 @@ import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
-
 import connectDB from "./config/db";
 import deviceRoutes from "./routes/deviceRoutes";
 
@@ -19,10 +18,10 @@ app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
 app.use(cors());
-
 app.use("/api/devices", deviceRoutes);
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5305;
+
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`);
 });

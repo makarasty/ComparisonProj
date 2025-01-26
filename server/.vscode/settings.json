@@ -27,5 +27,11 @@
 		"titleBar.inactiveBackground": "#867d0999",
 		"titleBar.inactiveForeground": "#e7e7e799"
 	},
-	"peacock.color": "#867d09"
+	"peacock.color": "#867d09",
+	"cSpell.words": [
+		"Beeceptor",
+		"Escuela",
+		"escuelajs",
+		"fakestore"
+	]
 }
