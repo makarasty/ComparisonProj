@@ -750,7 +750,7 @@ const App: React.FC = () => {
 							Заповнити базу даних
 						</Button>
 						<Typography variant="h4" fontWeight="bold">
-							Технічний магазин
+							Крутий сервіс
 						</Typography>
 						<IconButton color="inherit" onClick={() => setDarkMode((x) => !x)}>
 							{darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
