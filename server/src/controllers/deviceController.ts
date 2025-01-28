@@ -7,6 +7,7 @@ export async function getDevices(req: Request, res: Response) {
 
 		res.json({ data: devs });
 	} catch (e) {
+		console.log(e);
 		res.status(500).json({ message: "Server error" });
 	}
 }
@@ -24,6 +25,7 @@ export async function getDeviceById(req: Request, res: Response) {
 
 		res.json({ data: dev });
 	} catch (e) {
+		console.log(e);
 		res.status(500).json({ message: "Server error" });
 	}
 }
@@ -34,6 +36,7 @@ export async function createDevice(req: Request, res: Response) {
 
 		res.status(201).json({ data: c });
 	} catch (e) {
+		console.log(e);
 		res.status(500).json({ message: "Server error" });
 	}
 }
@@ -51,6 +54,7 @@ export async function updateDevice(req: Request, res: Response) {
 
 		res.json({ data: u });
 	} catch (e) {
+		console.log(e);
 		res.status(500).json({ message: "Server error" });
 	}
 }
@@ -68,6 +72,7 @@ export async function deleteDevice(req: Request, res: Response) {
 
 		res.json({ message: "Device deleted" });
 	} catch (e) {
+		console.log(e);
 		res.status(500).json({ message: "Server error" });
 	}
 }

@@ -1,30 +1,16 @@
 import { IProduct } from "../interfaces/Product";
-import { getFakeStoreApiProducts } from "./fakestoreApiService";
-import { getDummyJsonProducts } from "./dummyJsonService";
-import { getDummyJsonSmartphones } from "./dummyJsonSmartphonesService";
-import { getEscuelaJsProducts } from "./escuelajsService";
-import { getBeeceptorProducts } from "./beeceptorService";
+//import { getFakeStoreApiProducts } from "./api/trash/fakestoreApiService";
+import { getAllDummyJsonProducts } from "./api/dummyJsonService";
+import { getAllFakeStoreProducts } from "./api/fakestoreApiService";
+//import { getEscuelaJsProducts } from "./api/trash/escuelajsService";
+//import { getBeeceptorProducts } from "./api/trash/beeceptorService";
 
 export async function getAllProducts(): Promise<IProduct[]> {
-	const [
-		fakeStoreApiProducts,
-		dummyJsonProducts,
-		dummyJsonSmartphones,
-		escuelaJsProducts,
-		beeceptorProducts,
-	] = await Promise.all([
-		getFakeStoreApiProducts(),
-		getDummyJsonProducts(),
-		getDummyJsonSmartphones(),
-		getEscuelaJsProducts(),
-		getBeeceptorProducts(),
-	]);
+	const [dummyJsonProducts, fakeStoreProducts] =
+		await Promise.all([
+			getAllDummyJsonProducts(),
+			getAllFakeStoreProducts()
+		]);
 
-	return [
-		...fakeStoreApiProducts,
-		...dummyJsonProducts,
-		...dummyJsonSmartphones,
-		...escuelaJsProducts,
-		...beeceptorProducts,
-	];
+	return [...dummyJsonProducts, ...fakeStoreProducts];
 }
