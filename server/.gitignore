@@ -1,6 +1,8 @@
 LICENSE
 package-lock.json
 
+*.env
+
 # Logs
 logs
 *.log
