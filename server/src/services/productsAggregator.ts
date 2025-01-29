@@ -5,12 +5,17 @@ import { IProduct } from "../interfaces/Product";
 //import { getBeeceptorProducts } from "./api/trash/beeceptorService";
 import { getAllDummyJsonProducts } from "./api/dummyJsonService";
 import { getAllFakeStoreProducts } from "./api/fakestoreApiService";
+import { getAllEbayProducts } from "./api/ebayService";
 
 export async function getAllProducts(): Promise<IProduct[]> {
-	const [dummyJsonProducts, fakeStoreProducts] = await Promise.all([
-		getAllDummyJsonProducts(),
-		getAllFakeStoreProducts(),
-	]);
+	const [dummyJsonProducts, fakeStoreProducts, ebayProducts] =
+		await Promise.all([
+			getAllDummyJsonProducts(),
+			getAllFakeStoreProducts(),
+			getAllEbayProducts(),
+		]);
 
-	return [...dummyJsonProducts, ...fakeStoreProducts];
+	console.log(ebayProducts);
+
+	return [...dummyJsonProducts, ...fakeStoreProducts, ...ebayProducts];
 }
