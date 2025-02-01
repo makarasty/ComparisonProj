@@ -191,17 +191,7 @@ export default ProductCard;
 Головний компонент клієнтської частини організовує роботу додатку, завантажує список товарів із API, організовує фільтрацію, а також управляє списком товарів для порівняння. Також реалізовано перемикання темного/світлого режиму.
 
 ```tsx
-import React, { useState, useCallback, useEffect, useMemo } from "react";
-import {Container, Typography, Box, Button, TextField, Select, MenuItem, Fab, Zoom, IconButton, CssBaseline, Alert, Grid} from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { IProduct } from "./types/product";
-import { fetchProducts, seedProducts } from "./services/productService";
-import CompareTable from "./components/CompareTable";
-import ProductCard from "./components/ProductCard";
+// ... Імпорти компонентів та інших залежностей
 
 const MAX_COMPARE_ITEMS = 4;
 
@@ -331,57 +321,6 @@ export async function seedDevices(req: Request, res: Response) {
 }
 
 // Інші функції (getDeviceById, createDevice, updateDevice, deleteDevice)...
-```
-
-_Файл роутів (deviceRoutes.ts):_
-
-```ts
-import { Router } from "express";
-import {
-  getDevices,
-  seedDevices,
-  // Інші контролери...
-} from "../controllers/deviceController";
-
-const router = Router();
-
-router.get("/", getDevices);
-router.get("/seed/devices", seedDevices);
-// Додаткові маршрути для POST, PUT, DELETE
-
-export default router;
-```
-
-_Основний файл сервера (index.ts):_
-
-```ts
-import express from "express";
-import dotenv from "dotenv";
-import morgan from "morgan";
-import cors from "cors";
-import helmet from "helmet";
-import compression from "compression";
-import connectDB from "./config/db";
-import deviceRoutes from "./routes/deviceRoutes";
-
-dotenv.config();
-
-const app = express();
-
-connectDB();
-
-app.use(express.json());
-app.use(morgan("dev"));
-app.use(helmet());
-app.use(compression());
-app.use(cors());
-
-app.use("/api/devices", deviceRoutes);
-
-const PORT = process.env.PORT || 5305;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
 ```
 
 ---
