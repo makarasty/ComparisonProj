@@ -3,87 +3,83 @@ import * as deviceService from "../utils/databaseUtils";
 
 export async function getDevices(req: Request, res: Response) {
 	try {
-		const devs = await deviceService.getAllDevices();
-
-		res.json({ data: devs });
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Server error" });
+		const devices = await deviceService.getAllDevices();
+		return res.json({ data: devices });
+	} catch (error) {
+		console.error("Error fetching devices:", error);
+		return res.status(500).json({ message: "Server error" });
 	}
 }
 
 export async function getDeviceById(req: Request, res: Response) {
 	try {
 		const { id } = req.params;
+		const device = await deviceService.getDeviceById(id);
 
-		const dev = await deviceService.getDeviceById(id);
-
-		if (!dev) {
-			res.status(404).json({ message: "Device not found" });
-			return;
+		if (!device) {
+			return res.status(404).json({ message: "Device not found" });
 		}
-
-		res.json({ data: dev });
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Server error" });
+		return res.json({ data: device });
+	} catch (error) {
+		console.error("Error fetching device by id:", error);
+		return res.status(500).json({ message: "Server error" });
 	}
 }
 
 export async function createDevice(req: Request, res: Response) {
 	try {
-		const c = await deviceService.createDevice(req.body);
+		const deviceData = req.body;
 
-		res.status(201).json({ data: c });
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Server error" });
+		if (deviceData.uuid == null) {
+			deviceData.uuid = Math.floor(Math.random() * 1_000_000_000);
+		}
+
+		const createdDevice = await deviceService.createDevice(deviceData);
+		return res.status(201).json({ data: createdDevice });
+	} catch (error) {
+		console.error("Error creating device:", error);
+		return res.status(500).json({ message: "Server error" });
 	}
 }
 
 export async function updateDevice(req: Request, res: Response) {
 	try {
 		const { id } = req.params;
+		const updatedDevice = await deviceService.updateDevice(id, req.body);
 
-		const u = await deviceService.updateDevice(id, req.body);
-
-		if (!u) {
-			res.status(404).json({ message: "Device not found" });
-			return;
+		if (!updatedDevice) {
+			return res.status(404).json({ message: "Device not found" });
 		}
 
-		res.json({ data: u });
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Server error" });
+		return res.json({ data: updatedDevice });
+	} catch (error) {
+		console.error("Error updating device:", error);
+		return res.status(500).json({ message: "Server error" });
 	}
 }
 
 export async function deleteDevice(req: Request, res: Response) {
 	try {
 		const { id } = req.params;
+		const deletedDevice = await deviceService.deleteDevice(id);
 
-		const d = await deviceService.deleteDevice(id);
-
-		if (!d) {
-			res.status(404).json({ message: "Device not found" });
-			return;
+		if (!deletedDevice) {
+			return res.status(404).json({ message: "Device not found" });
 		}
 
-		res.json({ message: "Device deleted" });
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Server error" });
+		return res.json({ message: "Device deleted" });
+	} catch (error) {
+		console.error("Error deleting device:", error);
+		return res.status(500).json({ message: "Server error" });
 	}
 }
 
 export async function seedDevices(req: Request, res: Response) {
 	try {
-		const ins = await deviceService.insertDevices();
-
-		res.json({ message: "Database seeded", data: ins });
-	} catch (e) {
-		console.log(e);
-		res.status(500).json({ message: "Server error" });
+		const insertedDevices = await deviceService.insertDevices();
+		return res.json({ message: "Database seeded", data: insertedDevices });
+	} catch (error) {
+		console.error("Error seeding database:", error);
+		return res.status(500).json({ message: "Server error" });
 	}
 }

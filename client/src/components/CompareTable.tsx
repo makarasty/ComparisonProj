@@ -30,6 +30,7 @@ const universalFields = [
 	"category",
 	"price",
 	"rating",
+	"inStock",
 ];
 
 const fieldTranslations: Record<string, string> = {
@@ -39,11 +40,13 @@ const fieldTranslations: Record<string, string> = {
 	category: "Категорія",
 	price: "Ціна",
 	rating: "Рейтинг",
+	inStock: "Є в залишку",
 };
 
 const numericPreferences: Record<string, "min" | "max"> = {
 	price: "min",
 	rating: "max",
+	inStock: "max",
 };
 
 function getUniversalValue(prod: IProduct, field: string): unknown {
@@ -60,6 +63,8 @@ function getUniversalValue(prod: IProduct, field: string): unknown {
 			return prod.price;
 		case "rating":
 			return prod.rating;
+		case "inStock":
+			return prod.stock > 0 ? 1 : 0;
 		default:
 			return "-";
 	}
@@ -82,6 +87,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 
 	const valuesByProduct: Record<number, Record<string, unknown>> = {};
 	products.forEach((p) => {
+		if (!p.uuid) return;
 		const map: Record<string, unknown> = {};
 		fieldList.forEach((field) => {
 			if (universalFields.includes(field)) {
@@ -101,6 +107,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 				: Number.NEGATIVE_INFINITY;
 
 		products.forEach((p) => {
+			if (!p.uuid) return;
 			const val = valuesByProduct[p.uuid][field];
 			if (isNumeric(val)) {
 				if (numericPreferences[field] === "min") {
@@ -121,14 +128,16 @@ const CompareTable: React.FC<CompareTableProps> = ({
 
 	const winsCount: Record<number, number> = {};
 	products.forEach((p) => {
-		winsCount[p.uuid] = 0;
+		if (p.uuid) winsCount[p.uuid] = 0;
 	});
 
 	fieldList.forEach((field) => {
-		if (bestValues[field] !== undefined) {
+		const best = bestValues[field];
+		if (best !== undefined) {
 			products.forEach((p) => {
+				if (!p.uuid) return;
 				const val = valuesByProduct[p.uuid][field];
-				if (isNumeric(val) && val === bestValues[field]) {
+				if (isNumeric(val) && val === best) {
 					winsCount[p.uuid] += 1;
 				}
 			});
@@ -236,7 +245,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 											<Button
 												size="small"
 												variant="outlined"
-												onClick={() => onRemove(p.uuid)}
+												onClick={() => onRemove(p.uuid!)}
 												sx={{
 													minWidth: 30,
 													borderColor: theme.palette.error.main,
@@ -280,6 +289,8 @@ const CompareTable: React.FC<CompareTableProps> = ({
 									{fieldTranslations[field] ?? field}
 								</TableCell>
 								{products.map((p, idx) => {
+									if (!p.uuid) return null;
+
 									const val = valuesByProduct[p.uuid][field];
 									const numericVal = isNumeric(val) ? val : null;
 									const bestVal = bestValues[field];
@@ -293,6 +304,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 										: colStyle.backgroundColor;
 
 									if (field === "image") {
+										const imgUrl = val !== "-" ? String(val) : null;
 										return (
 											<TableCell
 												key={p.uuid}
@@ -303,9 +315,9 @@ const CompareTable: React.FC<CompareTableProps> = ({
 													overflow: "hidden",
 												}}
 											>
-												{val !== "-" ? (
+												{imgUrl ? (
 													<img
-														src={String(val)}
+														src={imgUrl}
 														alt={p.title}
 														style={{
 															maxWidth: "100px",
@@ -320,6 +332,21 @@ const CompareTable: React.FC<CompareTableProps> = ({
 										);
 									}
 
+									if (field === "inStock") {
+										return (
+											<TableCell
+												key={p.uuid}
+												sx={{
+													...colStyle,
+													backgroundColor: highlightBg,
+												}}
+											>
+												{val === 1 ? "так" : "ні"}
+											</TableCell>
+										);
+									}
+
+									const display = String(val);
 									return (
 										<TableCell
 											key={p.uuid}
@@ -334,12 +361,12 @@ const CompareTable: React.FC<CompareTableProps> = ({
 												whiteSpace: "nowrap",
 											}}
 										>
-											{typeof val === "string" && val.length > 50 ? (
-												<Tooltip title={val}>
-													<span>{val.slice(0, 50)}...</span>
+											{display.length > 50 ? (
+												<Tooltip title={display}>
+													<span>{display.slice(0, 50)}...</span>
 												</Tooltip>
 											) : (
-												String(val)
+												display
 											)}
 										</TableCell>
 									);
@@ -366,6 +393,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 								Перемоги
 							</TableCell>
 							{products.map((p, idx) => {
+								if (!p.uuid) return null;
 								const colStyle = columnStyles[idx];
 								return (
 									<TableCell

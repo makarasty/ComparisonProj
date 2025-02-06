@@ -62,7 +62,7 @@ function mapFakeStoreToProduct(item: FakeStoreProduct): IProduct {
 		image: item.image,
 		images: [item.image],
 		rating: item.rating.rate,
-		stock: item.rating.count,
+		stock: 0,
 		available: item.rating.count > 0,
 		discount: undefined,
 		dimensions: undefined,

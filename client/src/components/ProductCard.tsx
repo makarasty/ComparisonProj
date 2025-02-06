@@ -14,18 +14,28 @@ import { IProduct } from "../types/product";
 
 interface ProductCardProps {
 	product: IProduct;
-	inCompare: boolean;
-	toggleCompare: (product: IProduct) => void;
-	compareListLength: number;
-	maxCompareItems: number;
+	showCompareButton?: boolean;
+	inCompare?: boolean;
+	toggleCompare?: (product: IProduct) => void;
+	compareListLength?: number;
+	maxCompareItems?: number;
+
+	showAdminActions?: boolean;
+	onDelete?: () => void;
+	onEdit?: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
 	product,
-	inCompare,
+	showCompareButton = true,
+	inCompare = false,
 	toggleCompare,
-	compareListLength,
-	maxCompareItems,
+	compareListLength = 0,
+	maxCompareItems = 4,
+
+	showAdminActions = false,
+	onDelete,
+	onEdit,
 }) => {
 	const buttonLabel = inCompare
 		? "Видалити з порівняння"
@@ -87,22 +97,36 @@ const ProductCard: React.FC<ProductCardProps> = ({
 					<Rating value={product.rating} precision={0.5} readOnly />
 				</Box>
 			</CardContent>
-			<Box sx={{ p: 2 }}>
-				<Button
-					fullWidth
-					variant="contained"
-					color={inCompare ? "primary" : "secondary"}
-					onClick={() => toggleCompare(product)}
-					disabled={!inCompare && compareListLength >= maxCompareItems}
-				>
-					{buttonLabel}
-				</Button>
-				{!inCompare && compareListLength >= maxCompareItems && (
-					<span style={{ color: "red", fontSize: "0.8rem" }}>
-						Максимум досягнуто
-					</span>
-				)}
-			</Box>
+
+			{showCompareButton && toggleCompare && (
+				<Box sx={{ p: 2 }}>
+					<Button
+						fullWidth
+						variant="contained"
+						color={inCompare ? "primary" : "secondary"}
+						onClick={() => toggleCompare(product)}
+						disabled={!inCompare && compareListLength >= maxCompareItems}
+					>
+						{buttonLabel}
+					</Button>
+					{!inCompare && compareListLength >= maxCompareItems && (
+						<span style={{ color: "red", fontSize: "0.8rem" }}>
+							Максимум досягнуто
+						</span>
+					)}
+				</Box>
+			)}
+
+			{showAdminActions && (
+				<Box sx={{ display: "flex", gap: 1, p: 2, pt: 0 }}>
+					<Button variant="outlined" color="error" onClick={onDelete}>
+						Видалити
+					</Button>
+					<Button variant="outlined" onClick={onEdit}>
+						Змінити
+					</Button>
+				</Box>
+			)}
 		</Card>
 	);
 };
