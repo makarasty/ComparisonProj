@@ -34,6 +34,10 @@ export async function createDevice(req: Request, res: Response) {
 			deviceData.uuid = Math.floor(Math.random() * 1_000_000_000);
 		}
 
+		if (!deviceData.image) {
+			deviceData.image = "images/unknown.jpg";
+		}
+
 		const createdDevice = await deviceService.createDevice(deviceData);
 		return res.status(201).json({ data: createdDevice });
 	} catch (error) {

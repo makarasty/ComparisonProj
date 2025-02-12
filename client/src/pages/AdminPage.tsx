@@ -1,158 +1,116 @@
-import React, {
-	useState,
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-} from "react";
+import React, { useState, useCallback } from "react";
 import {
 	Typography,
 	Box,
-	Select,
-	MenuItem,
-	Grid,
 	Button,
 	Alert,
-	Fab,
-	Zoom,
+	TableContainer,
+	Table,
+	TableHead,
+	TableRow,
+	TableCell,
+	TableBody,
+	Paper,
+	IconButton,
 	TextField,
+	Tooltip,
 } from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
 
 import { IProduct } from "../types/product";
 import {
-	fetchProducts,
 	seedProducts,
 	addProduct,
 	deleteProduct,
 	updateProduct,
 } from "../services/productService";
+import FullImageViewer from "../components/FullImageViewer";
+import ProductForm from "../components/ProductForm";
 
-import CompareTable from "../components/CompareTable";
-import ProductCard from "../components/ProductCard";
+import { useFetchProducts } from "../hooks/useFetchProducts";
+import { useScrollToTopOnMessages } from "../hooks/useScrollToTopOnMessages";
+import { useProductFilters } from "../hooks/useProductFilters";
 
 const AdminPage: React.FC = () => {
-	const [products, setProducts] = useState<IProduct[]>([]);
-	const [error, setError] = useState<string | null>(null);
+	const { products, error, setError, reload } = useFetchProducts();
+
 	const [success, setSuccess] = useState<string | null>(null);
+	useScrollToTopOnMessages(success, error);
 
-	const [brand, setBrand] = useState("");
-	const [minPrice, setMinPrice] = useState<number | "">("");
-	const [maxPrice, setMaxPrice] = useState<number | "">("");
-	const [minRating, setMinRating] = useState<number | "">("");
+	const [searchTerm, setSearchTerm] = useState("");
 
-	const [compareUuids, setCompareUuids] = useState<number[]>([]);
-	const compareList = useMemo(
-		() => products.filter((p) => p.uuid && compareUuids.includes(p.uuid)),
-		[products, compareUuids],
-	);
+	const [openImageViewer, setOpenImageViewer] = useState(false);
+	const [imageToView, setImageToView] = useState<string>("");
 
-	const [newProductTitle, setNewProductTitle] = useState("");
-	const [newProductBrand, setNewProductBrand] = useState("");
-	const [newProductPrice, setNewProductPrice] = useState<number | "">("");
-	const [newProductImage, setNewProductImage] = useState("");
-
-	const [editingProduct, setEditingProduct] =
-		useState<Partial<IProduct> | null>(null);
-
-	const editFormRef = useRef<HTMLDivElement | null>(null);
-	const addFormRef = useRef<HTMLDivElement | null>(null);
-
-	const [showScrollUp, setShowScrollUp] = useState(false);
-	const [showScrollDown, setShowScrollDown] = useState(false);
-
-	const handleScroll = useCallback(() => {
-		const st = window.pageYOffset || document.documentElement.scrollTop;
-		const wh = window.innerHeight;
-		const dh = document.documentElement.scrollHeight;
-		setShowScrollUp(st > 250);
-		setShowScrollDown(st + wh < dh - 100);
-	}, []);
-
-	useEffect(() => {
-		window.addEventListener("scroll", handleScroll);
-		handleScroll();
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [handleScroll]);
-
-	const scrollToTop = useCallback(() => {
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	}, []);
-	const scrollToBottom = useCallback(() => {
-		window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-	}, []);
-	const scrollToEditForm = useCallback(() => {
-		setTimeout(() => {
-			editFormRef.current?.scrollIntoView({ behavior: "smooth" });
-		}, 200);
-	}, []);
-	const scrollToAddForm = useCallback(() => {
-		setTimeout(() => {
-			addFormRef.current?.scrollIntoView({ behavior: "smooth" });
-		}, 200);
-	}, []);
-
-	const loadData = useCallback(async () => {
-		try {
-			setError(null);
-			const data = await fetchProducts();
-			setProducts(data);
-		} catch (e) {
-			console.error(e);
-			setError("Помилка при завантаженні товарів");
-		}
-	}, []);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
-
-	useEffect(() => {
-		if (success || error) {
-			window.scrollTo({ top: 0, behavior: "smooth" });
-		}
-	}, [success, error]);
+	const [productFormOpen, setProductFormOpen] = useState(false);
+	const [productFormData, setProductFormData] = useState<Partial<IProduct>>({});
+	const [formTitle, setFormTitle] = useState<string>("Додати товар");
 
 	const handleSeed = useCallback(async () => {
 		try {
 			setSuccess(null);
 			await seedProducts();
 			setSuccess("База даних успішно заповнена демонстраційними даними!");
-			await loadData();
+			await reload();
 		} catch (e) {
 			console.error(e);
 			setError("Сталася помилка при заповненні бази даних. Спробуйте пізніше.");
 		}
-	}, [loadData]);
-	const handleAddProduct = async () => {
+	}, [reload, setError]);
+
+	const handleAddModalOpen = () => {
+		setProductFormData({});
+		setFormTitle("Додати новий товар");
+		setProductFormOpen(true);
+	};
+
+	const handleEditClick = (prod: IProduct) => {
+		if (!prod._id) {
+			alert("Немає _id, не можемо редагувати.");
+			return;
+		}
+		setProductFormData(prod);
+		setFormTitle("Редагувати товар");
+		setProductFormOpen(true);
+	};
+
+	const handleCloseForm = () => {
+		setProductFormOpen(false);
+	};
+
+	const handleSubmitForm = async (data: Partial<IProduct>) => {
 		try {
-			if (!newProductTitle) {
+			if (!data.title) {
 				alert("Вкажіть, будь ласка, назву товару");
 				return;
 			}
-			const productData: Partial<IProduct> = {
-				title: newProductTitle,
-				brand: newProductBrand || "NoBrand",
-				price: newProductPrice === "" ? 0 : newProductPrice,
-				image: newProductImage,
-				rating: 0,
-				description: "Додано адміністратором",
-				stock: 100,
-				available: true,
-			};
-			const created = await addProduct(productData);
-			setSuccess(`Товар «${created.title}» успішно додано!`);
+			if (!data.description) {
+				alert("Вкажіть, будь ласка, опис товару");
+				return;
+			}
+			if (data.price === undefined) {
+				alert("Вкажіть, будь ласка, ціну товару");
+				return;
+			}
 
-			setNewProductTitle("");
-			setNewProductBrand("");
-			setNewProductPrice("");
-			setNewProductImage("");
-
-			await loadData();
+			if (data._id) {
+				await updateProduct(data._id, data);
+				setSuccess(`Товар '${data.title}' оновлено.`);
+			} else {
+				const created = await addProduct(data);
+				setSuccess(`Товар «${created.title}» успішно додано!`);
+			}
+			setProductFormOpen(false);
+			setProductFormData({});
+			await reload();
 		} catch (e) {
 			console.error(e);
-			setError("Помилка при додаванні товару.");
+			setError("Помилка при збереженні товару.");
 		}
 	};
 
@@ -167,115 +125,45 @@ const AdminPage: React.FC = () => {
 		try {
 			await deleteProduct(prod._id);
 			setSuccess(`Товар '${prod.title}' успішно видалено.`);
-			await loadData();
+			await reload();
 		} catch (e) {
 			console.error(e);
 			setError("Помилка при видаленні товару.");
 		}
 	};
 
-	const handleEditProduct = (prod: IProduct) => {
-		if (!prod._id) {
-			alert("Немає _id, не можемо редагувати.");
-			return;
-		}
-		setEditingProduct({
-			_id: prod._id,
-			title: prod.title,
-			brand: prod.brand,
-			price: prod.price,
-			image: prod.image,
-			description: prod.description,
-			stock: prod.stock,
-			rating: prod.rating,
-			available: prod.available,
-		});
-		scrollToEditForm();
+	const handleOpenImageViewer = (imageUrl: string) => {
+		setImageToView(imageUrl);
+		setOpenImageViewer(true);
+	};
+	const handleCloseImageViewer = () => {
+		setOpenImageViewer(false);
+		setImageToView("");
 	};
 
-	const handleEditingFieldChange = (
-		field: keyof IProduct,
-		value: string | number,
-	) => {
-		if (!editingProduct) return;
-		setEditingProduct({ ...editingProduct, [field]: value });
+	const handleGoBack = () => {
+		window.history.back();
 	};
 
-	const handleSaveChanges = async () => {
-		if (!editingProduct?._id) {
-			alert("Немає _id у товару, неможливо оновити.");
-			return;
-		}
-		try {
-			await updateProduct(editingProduct._id, editingProduct);
-			setSuccess(`Товар '${editingProduct.title}' оновлено.`);
-			setEditingProduct(null);
-			await loadData();
-		} catch (e) {
-			console.error(e);
-			setError("Помилка при оновленні товару.");
-		}
-	};
-
-	const handleCancelEdit = () => {
-		setEditingProduct(null);
-	};
-
-	const allBrands = useMemo(() => {
-		const s = new Set<string>();
-		products.forEach((p) => {
-			if (p.brand) s.add(p.brand);
-		});
-		return Array.from(s);
-	}, [products]);
-
-	const filteredProducts = useMemo(() => {
-		return products.filter((p) => {
-			if (brand && p.brand !== brand) return false;
-			if (minPrice !== "" && p.price < minPrice) return false;
-			if (maxPrice !== "" && p.price > maxPrice) return false;
-			if (minRating !== "" && p.rating < minRating) return false;
-			return true;
-		});
-	}, [products, brand, minPrice, maxPrice, minRating]);
-
-	const handleFilter = async () => {
-		try {
-			setSuccess(null);
-			await loadData();
-		} catch (e) {
-			console.error(e);
-			setError("Сталася помилка при фільтрації. Спробуйте пізніше.");
-		}
-	};
-
-	const resetFiltersAdmin = async () => {
-		setBrand("");
-		setMinPrice("");
-		setMaxPrice("");
-		setMinRating("");
-		setSuccess(null);
-
-		try {
-			await loadData();
-		} catch (e) {
-			console.error(e);
-			setError("Не вдалося скинути фільтри. Спробуйте пізніше.");
-		}
-	};
-
-	const handleRemoveFromCompare = (uuid: number) => {
-		setCompareUuids((prev) => prev.filter((id) => id !== uuid));
-	};
-	const handleClearAllCompare = () => {
-		setCompareUuids([]);
-	};
+	const filteredProducts = useProductFilters({
+		allProducts: products,
+		searchTerm,
+	});
 
 	return (
 		<Box sx={{ py: 4 }}>
-			<Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
-				Адміністрування
-			</Typography>
+			<Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
+				<Button
+					variant="outlined"
+					startIcon={<ArrowBackIcon />}
+					onClick={handleGoBack}
+				>
+					Назад
+				</Button>
+				<Typography variant="h4" fontWeight="bold" sx={{ flexGrow: 1 }}>
+					Адміністрування
+				</Typography>
+			</Box>
 
 			{success && (
 				<Alert
@@ -294,284 +182,115 @@ const AdminPage: React.FC = () => {
 
 			<Box sx={{ mb: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
 				<Button variant="contained" onClick={handleSeed}>
-					Заповнити базу даних демо-товарами
-				</Button>
-				<Button variant="outlined" onClick={scrollToAddForm}>
-					Перейти до додавання товару
-				</Button>
-			</Box>
-
-			<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
-				<Select
-					value={brand}
-					onChange={(e) => setBrand(e.target.value)}
-					displayEmpty
-					sx={{ width: 180 }}
-				>
-					<MenuItem value="">Усі бренди</MenuItem>
-					{allBrands.map((b) => (
-						<MenuItem key={b} value={b}>
-							{b}
-						</MenuItem>
-					))}
-				</Select>
-
-				<TextField
-					label="Мін. ціна"
-					type="number"
-					value={minPrice}
-					onChange={(e) =>
-						setMinPrice(e.target.value ? parseInt(e.target.value, 10) : "")
-					}
-				/>
-				<TextField
-					label="Макс. ціна"
-					type="number"
-					value={maxPrice}
-					onChange={(e) =>
-						setMaxPrice(e.target.value ? parseInt(e.target.value, 10) : "")
-					}
-				/>
-				<TextField
-					label="Мін. рейтинг"
-					type="number"
-					value={minRating}
-					onChange={(e) =>
-						setMinRating(e.target.value ? parseInt(e.target.value, 10) : "")
-					}
-				/>
-				<Button variant="outlined" onClick={handleFilter} color="primary">
-					Фільтрувати
+					Заповнити демо-даними
 				</Button>
 				<Button
 					variant="outlined"
-					onClick={resetFiltersAdmin}
-					color="secondary"
+					startIcon={<AddIcon />}
+					onClick={handleAddModalOpen}
 				>
-					Скинути
+					Додати товар
 				</Button>
+
+				<Box sx={{ display: "flex", alignItems: "center", ml: "auto" }}>
+					<SearchIcon sx={{ mr: 1 }} />
+					<TextField
+						label="Пошук..."
+						variant="outlined"
+						size="small"
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+					/>
+				</Box>
 			</Box>
 
-			<Grid container spacing={2}>
-				{filteredProducts.map((prod) => (
-					<Grid item xs={12} sm={6} md={4} key={prod._id || prod.uuid}>
-						<ProductCard
-							product={prod}
-							showCompareButton={false}
-							showAdminActions
-							onDelete={() => handleDeleteProduct(prod)}
-							onEdit={() => handleEditProduct(prod)}
-						/>
-					</Grid>
-				))}
-			</Grid>
+			<TableContainer component={Paper} elevation={3}>
+				<Table sx={{ "& td, & th": { fontSize: "1.1rem" } }}>
+					<TableHead>
+						<TableRow>
+							<TableCell>Зображення</TableCell>
+							<TableCell>Назва</TableCell>
+							<TableCell>Бренд</TableCell>
+							<TableCell>Ціна</TableCell>
+							<TableCell>Рейтинг</TableCell>
+							<TableCell>В наявності</TableCell>
+							<TableCell>Дії</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{filteredProducts.map((prod) => (
+							<TableRow key={prod._id || prod.uuid}>
+								<TableCell>
+									{prod.image ? (
+										<Box
+											component="img"
+											src={prod.image}
+											alt={prod.title}
+											sx={{
+												width: 60,
+												height: 60,
+												objectFit: "contain",
+												backgroundColor: "background.default",
+												cursor: "pointer",
+											}}
+											onClick={() => handleOpenImageViewer(prod.image)}
+										/>
+									) : (
+										"-"
+									)}
+								</TableCell>
+								<TableCell>
+									<Tooltip title={prod.title}>
+										<span style={{ fontWeight: 500 }}>{prod.title}</span>
+									</Tooltip>
+								</TableCell>
+								<TableCell>{prod.brand || "-"}</TableCell>
+								<TableCell>${prod.price}</TableCell>
+								<TableCell>{prod.rating ?? 0}</TableCell>
+								<TableCell>{prod.stock > 0 ? "так" : "ні"}</TableCell>
+								<TableCell>
+									<IconButton
+										size="small"
+										color="primary"
+										onClick={() => handleEditClick(prod)}
+									>
+										<EditIcon />
+									</IconButton>
+									<IconButton
+										size="small"
+										color="error"
+										onClick={() => handleDeleteProduct(prod)}
+									>
+										<DeleteIcon />
+									</IconButton>
+								</TableCell>
+							</TableRow>
+						))}
 
-			<CompareTable
-				products={compareList}
-				onRemove={handleRemoveFromCompare}
-				onClearAll={handleClearAllCompare}
+						{filteredProducts.length === 0 && (
+							<TableRow>
+								<TableCell colSpan={7} align="center">
+									Нічого не знайдено...
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+			</TableContainer>
+
+			<FullImageViewer
+				open={openImageViewer}
+				imageUrl={imageToView}
+				onClose={handleCloseImageViewer}
 			/>
 
-			<Box
-				ref={addFormRef}
-				sx={{
-					mt: 5,
-					p: 2,
-					border: "1px solid #ccc",
-					borderRadius: 2,
-				}}
-			>
-				<Typography variant="h5" sx={{ mb: 2 }}>
-					Додати новий товар
-				</Typography>
-				<Grid container spacing={2} sx={{ mb: 2 }}>
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Назва"
-							fullWidth
-							value={newProductTitle}
-							onChange={(e) => setNewProductTitle(e.target.value)}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Бренд"
-							fullWidth
-							value={newProductBrand}
-							onChange={(e) => setNewProductBrand(e.target.value)}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Ціна"
-							fullWidth
-							type="number"
-							value={newProductPrice}
-							onChange={(e) =>
-								setNewProductPrice(
-									e.target.value ? parseInt(e.target.value, 10) : "",
-								)
-							}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6} md={3}>
-						<TextField
-							label="Посилання на зображення"
-							fullWidth
-							value={newProductImage}
-							onChange={(e) => setNewProductImage(e.target.value)}
-						/>
-					</Grid>
-					<Grid item xs={12} sm={6} md={4}>
-						<Button
-							variant="contained"
-							color="success"
-							sx={{ height: "100%" }}
-							onClick={handleAddProduct}
-							fullWidth
-						>
-							Додати товар
-						</Button>
-					</Grid>
-				</Grid>
-			</Box>
-
-			{editingProduct && (
-				<Box
-					ref={editFormRef}
-					sx={{
-						mt: 5,
-						p: 2,
-						border: "1px solid #ccc",
-						borderRadius: 2,
-					}}
-				>
-					<Typography variant="h5" sx={{ mb: 2 }}>
-						Редагувати товар
-					</Typography>
-					<Grid container spacing={2} sx={{ mb: 2 }}>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="Назва"
-								fullWidth
-								value={editingProduct.title || ""}
-								onChange={(e) =>
-									handleEditingFieldChange("title", e.target.value)
-								}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="Бренд"
-								fullWidth
-								value={editingProduct.brand || ""}
-								onChange={(e) =>
-									handleEditingFieldChange("brand", e.target.value)
-								}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="Ціна"
-								fullWidth
-								type="number"
-								value={editingProduct.price || ""}
-								onChange={(e) =>
-									handleEditingFieldChange(
-										"price",
-										parseFloat(e.target.value) || 0,
-									)
-								}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="Зображення (URL)"
-								fullWidth
-								value={editingProduct.image || ""}
-								onChange={(e) =>
-									handleEditingFieldChange("image", e.target.value)
-								}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="Опис"
-								fullWidth
-								value={editingProduct.description || ""}
-								onChange={(e) =>
-									handleEditingFieldChange("description", e.target.value)
-								}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="Рейтинг"
-								fullWidth
-								type="number"
-								value={editingProduct.rating || ""}
-								onChange={(e) =>
-									handleEditingFieldChange(
-										"rating",
-										parseFloat(e.target.value) || 0,
-									)
-								}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6} md={3}>
-							<TextField
-								label="К-сть на складі (stock)"
-								fullWidth
-								type="number"
-								value={editingProduct.stock || ""}
-								onChange={(e) =>
-									handleEditingFieldChange(
-										"stock",
-										parseInt(e.target.value) || 0,
-									)
-								}
-							/>
-						</Grid>
-					</Grid>
-					<Box sx={{ display: "flex", gap: 2 }}>
-						<Button
-							variant="contained"
-							color="success"
-							onClick={handleSaveChanges}
-						>
-							Зберегти
-						</Button>
-						<Button
-							variant="outlined"
-							color="inherit"
-							onClick={handleCancelEdit}
-						>
-							Скасувати
-						</Button>
-					</Box>
-				</Box>
-			)}
-
-			<Zoom in={showScrollUp}>
-				<Fab
-					color="primary"
-					size="small"
-					onClick={scrollToTop}
-					sx={{ position: "fixed", bottom: 80, right: 20, zIndex: 1000 }}
-				>
-					<KeyboardArrowUpIcon />
-				</Fab>
-			</Zoom>
-			<Zoom in={showScrollDown}>
-				<Fab
-					color="secondary"
-					size="small"
-					onClick={scrollToBottom}
-					sx={{ position: "fixed", bottom: 20, right: 20, zIndex: 1000 }}
-				>
-					<KeyboardArrowDownIcon />
-				</Fab>
-			</Zoom>
+			<ProductForm
+				open={productFormOpen}
+				initialData={productFormData}
+				onClose={handleCloseForm}
+				onSubmit={handleSubmitForm}
+				title={formTitle}
+			/>
 		</Box>
 	);
 };

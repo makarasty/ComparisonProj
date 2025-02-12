@@ -56,44 +56,54 @@ const App: React.FC = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<Router>
-				<AppBar position="sticky">
-					<Toolbar>
-						<Typography variant="h6" sx={{ flexGrow: 1 }}>
-							Магазин
-						</Typography>
-						<IconButton color="inherit" onClick={() => setDarkMode(!darkMode)}>
-							{darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-						</IconButton>
-						<Box sx={{ display: "flex", gap: 2, ml: 2 }}>
-							<Button component={Link} to="/" color="inherit">
-								Головна
-							</Button>
-							<Button component={Link} to="/admin" color="inherit">
-								Адміністрування
-							</Button>
-						</Box>
-					</Toolbar>
-				</AppBar>
+			<Box
+				sx={{
+					display: "flex",
+					flexDirection: "column",
+					minHeight: "100vh",
+				}}
+			>
+				<Router>
+					<AppBar position="static">
+						<Toolbar>
+							<Typography variant="h6" sx={{ flexGrow: 1 }}>
+								Магазин
+							</Typography>
+							<IconButton
+								color="inherit"
+								onClick={() => setDarkMode(!darkMode)}
+							>
+								{darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+							</IconButton>
+							<Box sx={{ display: "flex", gap: 2, ml: 2 }}>
+								<Button component={Link} to="/" color="inherit">
+									Головна
+								</Button>
+								<Button component={Link} to="/admin" color="inherit">
+									Адміністрування
+								</Button>
+							</Box>
+						</Toolbar>
+					</AppBar>
 
-				<Box sx={{ minHeight: "80vh", px: { xs: 2, md: 4 } }}>
-					<Routes>
-						<Route path="/" element={<HomePage />} />
-						<Route path="/admin" element={<AdminPage />} />
-					</Routes>
-				</Box>
+					<Box sx={{ flexGrow: 1, px: { xs: 2, md: 4 } }}>
+						<Routes>
+							<Route path="/" element={<HomePage />} />
+							<Route path="/admin" element={<AdminPage />} />
+						</Routes>
+					</Box>
 
-				<Box
-					sx={{
-						textAlign: "center",
-						py: 2,
-						mt: 4,
-						bgcolor: darkMode ? "#1c1c1c" : "#e0e0e0",
-					}}
-				>
-					<Typography variant="body2">© 2025 MKY was here</Typography>
-				</Box>
-			</Router>
+					<Box
+						sx={{
+							textAlign: "center",
+							py: 2,
+							bgcolor: darkMode ? "#1c1c1c" : "#e0e0e0",
+						}}
+					>
+						<Typography variant="body2">© 2025 MKY was here</Typography>
+					</Box>
+				</Router>
+			</Box>
 		</ThemeProvider>
 	);
 };

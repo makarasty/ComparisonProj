@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { IProduct } from "../types/product";
 import { isNumeric } from "../services/productService";
+import { stickyCellStyles } from "../utils/tableStyles";
 
 interface CompareTableProps {
 	products: IProduct[];
@@ -40,7 +41,7 @@ const fieldTranslations: Record<string, string> = {
 	category: "Категорія",
 	price: "Ціна",
 	rating: "Рейтинг",
-	inStock: "Є в залишку",
+	inStock: "Ще продається",
 };
 
 const numericPreferences: Record<string, "min" | "max"> = {
@@ -68,6 +69,44 @@ function getUniversalValue(prod: IProduct, field: string): unknown {
 		default:
 			return "-";
 	}
+}
+
+function renderTableCellContent(
+	field: string,
+	val: unknown,
+	isBest: boolean,
+	colStyle: React.CSSProperties,
+	product: IProduct,
+) {
+	if (field === "image") {
+		const imgUrl = val !== "-" ? String(val) : null;
+		return imgUrl ? (
+			<img
+				src={imgUrl}
+				alt={product.title}
+				style={{
+					maxWidth: "100px",
+					maxHeight: "100px",
+					objectFit: "contain",
+				}}
+			/>
+		) : (
+			"-"
+		);
+	}
+
+	if (field === "inStock") {
+		return val === 1 ? "так" : "ні";
+	}
+
+	const display = String(val);
+	return display.length > 50 ? (
+		<Tooltip title={display}>
+			<span>{display.slice(0, 50)}...</span>
+		</Tooltip>
+	) : (
+		display
+	);
 }
 
 const CompareTable: React.FC<CompareTableProps> = ({
@@ -155,7 +194,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 				? theme.palette.grey[800]
 				: theme.palette.grey[200],
 			color: theme.palette.text.primary,
-		};
+		} as React.CSSProperties;
 	});
 
 	return (
@@ -185,10 +224,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 						>
 							<TableCell
 								sx={{
-									position: "sticky",
-									left: 0,
-									width: "200px",
-									minWidth: "200px",
+									...stickyCellStyles,
 									backgroundColor:
 										theme.palette.mode === "dark"
 											? theme.palette.primary.dark
@@ -197,7 +233,6 @@ const CompareTable: React.FC<CompareTableProps> = ({
 									fontWeight: 600,
 									fontSize: "1rem",
 									border: "none",
-									whiteSpace: "nowrap",
 									zIndex: 3,
 								}}
 							>
@@ -272,17 +307,13 @@ const CompareTable: React.FC<CompareTableProps> = ({
 							<TableRow key={field}>
 								<TableCell
 									sx={{
-										position: "sticky",
-										left: 0,
-										width: "200px",
-										minWidth: "200px",
+										...stickyCellStyles,
 										backgroundColor:
 											theme.palette.mode === "dark"
 												? theme.palette.grey[800]
 												: theme.palette.grey[200],
 										color: theme.palette.text.primary,
 										fontWeight: 600,
-										whiteSpace: "nowrap",
 										zIndex: 2,
 									}}
 								>
@@ -290,7 +321,6 @@ const CompareTable: React.FC<CompareTableProps> = ({
 								</TableCell>
 								{products.map((p, idx) => {
 									if (!p.uuid) return null;
-
 									const val = valuesByProduct[p.uuid][field];
 									const numericVal = isNumeric(val) ? val : null;
 									const bestVal = bestValues[field];
@@ -298,55 +328,12 @@ const CompareTable: React.FC<CompareTableProps> = ({
 										numericVal !== null &&
 										bestVal !== undefined &&
 										numericVal === bestVal;
+
 									const colStyle = columnStyles[idx];
 									const highlightBg = isBest
 										? alpha(theme.palette.warning.main, 0.3)
 										: colStyle.backgroundColor;
 
-									if (field === "image") {
-										const imgUrl = val !== "-" ? String(val) : null;
-										return (
-											<TableCell
-												key={p.uuid}
-												sx={{
-													...colStyle,
-													backgroundColor: highlightBg,
-													textAlign: "center",
-													overflow: "hidden",
-												}}
-											>
-												{imgUrl ? (
-													<img
-														src={imgUrl}
-														alt={p.title}
-														style={{
-															maxWidth: "100px",
-															maxHeight: "100px",
-															objectFit: "contain",
-														}}
-													/>
-												) : (
-													"-"
-												)}
-											</TableCell>
-										);
-									}
-
-									if (field === "inStock") {
-										return (
-											<TableCell
-												key={p.uuid}
-												sx={{
-													...colStyle,
-													backgroundColor: highlightBg,
-												}}
-											>
-												{val === 1 ? "так" : "ні"}
-											</TableCell>
-										);
-									}
-
-									const display = String(val);
 									return (
 										<TableCell
 											key={p.uuid}
@@ -361,13 +348,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 												whiteSpace: "nowrap",
 											}}
 										>
-											{display.length > 50 ? (
-												<Tooltip title={display}>
-													<span>{display.slice(0, 50)}...</span>
-												</Tooltip>
-											) : (
-												display
-											)}
+											{renderTableCellContent(field, val, isBest, colStyle, p)}
 										</TableCell>
 									);
 								})}
@@ -376,17 +357,13 @@ const CompareTable: React.FC<CompareTableProps> = ({
 						<TableRow>
 							<TableCell
 								sx={{
-									position: "sticky",
-									left: 0,
-									width: "200px",
-									minWidth: "200px",
+									...stickyCellStyles,
 									backgroundColor:
 										theme.palette.mode === "dark"
 											? theme.palette.grey[800]
 											: theme.palette.grey[200],
 									color: theme.palette.text.primary,
 									fontWeight: 700,
-									whiteSpace: "nowrap",
 									zIndex: 2,
 								}}
 							>

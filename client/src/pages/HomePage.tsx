@@ -15,15 +15,21 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 import { IProduct } from "../types/product";
-import { fetchProducts } from "../services/productService";
 import CompareTable from "../components/CompareTable";
 import ProductCard from "../components/ProductCard";
 import CategoryCard from "../components/CategoryCard";
 
+import { useFetchProducts } from "../hooks/useFetchProducts";
+import { useScrollToTopOnMessages } from "../hooks/useScrollToTopOnMessages";
+import { useProductFilters } from "../hooks/useProductFilters";
+
 const MAX_COMPARE_ITEMS = 4;
 
 const HomePage: React.FC = () => {
-	const [products, setProducts] = useState<IProduct[]>([]);
+	const { products, error, setError } = useFetchProducts();
+	const [success, setSuccess] = useState<string | null>(null);
+	useScrollToTopOnMessages(success, error);
+
 	const [compareUuids, setCompareUuids] = useState<number[]>(() => {
 		try {
 			const data = localStorage.getItem("compareList");
@@ -39,31 +45,8 @@ const HomePage: React.FC = () => {
 	const [maxPrice, setMaxPrice] = useState<number | "">("");
 	const [minRating, setMinRating] = useState<number | "">("");
 
-	const [error, setError] = useState<string | null>(null);
-	const [success, setSuccess] = useState<string | null>(null);
-
 	const [showScrollUp, setShowScrollUp] = useState(false);
 	const [showScrollDown, setShowScrollDown] = useState(false);
-
-	const loadData = useCallback(async () => {
-		try {
-			const data = await fetchProducts();
-			if (!data || data.length === 0) {
-				throw new Error("Немає даних");
-			}
-			setProducts(data);
-			setError(null);
-		} catch (e) {
-			console.error(e);
-			setError(
-				"Сталася помилка при завантаженні продуктів. Спробуйте пізніше або перевірте з'єднання.",
-			);
-		}
-	}, []);
-
-	useEffect(() => {
-		loadData();
-	}, [loadData]);
 
 	useEffect(() => {
 		function handleScroll() {
@@ -78,16 +61,9 @@ const HomePage: React.FC = () => {
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, []);
 
-	useEffect(() => {
-		if (error || success) {
-			window.scrollTo({ top: 0, behavior: "smooth" });
-		}
-	}, [error, success]);
-
 	const scrollToTop = useCallback(() => {
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	}, []);
-
 	const scrollToBottom = useCallback(() => {
 		window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 	}, []);
@@ -106,7 +82,7 @@ const HomePage: React.FC = () => {
 					alert(`Можна порівняти максимум ${MAX_COMPARE_ITEMS} товарів.`);
 					return;
 				}
-				setCompareUuids((prev) => [...prev, product.uuid!]);
+				setCompareUuids((prev) => [...prev, product.uuid]);
 			}
 		},
 		[compareUuids],
@@ -166,61 +142,31 @@ const HomePage: React.FC = () => {
 		return result;
 	}, [products]);
 
+	const filteredProducts = useProductFilters({
+		allProducts: products,
+		selectedCategory,
+		brand,
+		minPrice,
+		maxPrice,
+		minRating,
+	});
+
 	const handleSelectCategory = (catName: string) => {
 		setSelectedCategory(catName === "Інше" ? "Інше" : catName);
 	};
 
-	const filteredProducts = useMemo(() => {
-		return products.filter((p) => {
-			if (selectedCategory === "Інше") {
-				const countInThisCategory = products.filter(
-					(x) => x.category === p.category,
-				).length;
-				if (countInThisCategory > 3) return false;
-			} else if (selectedCategory && p.category !== selectedCategory) {
-				return false;
-			}
-			if (brand && p.brand !== brand) return false;
-			if (minPrice !== "" && p.price < minPrice) return false;
-			if (maxPrice !== "" && p.price > maxPrice) return false;
-			if (minRating !== "" && p.rating < minRating) return false;
-			return true;
-		});
-	}, [products, selectedCategory, brand, minPrice, maxPrice, minRating]);
-
-	const allBrands = useMemo(() => {
-		const s = new Set<string>();
-		products.forEach((p) => {
-			if (p.brand) s.add(p.brand);
-		});
-		return Array.from(s);
-	}, [products]);
-
 	const handleFilter = async () => {
-		try {
-			setSuccess(null);
-			await loadData();
-		} catch (e) {
-			console.error(e);
-			setError("Сталася помилка при фільтрації. Спробуйте пізніше.");
-		}
+		setSuccess(null);
 	};
 
-	const resetFiltersMain = useCallback(async () => {
+	const resetFiltersMain = useCallback(() => {
 		setSelectedCategory("");
 		setBrand("");
 		setMinPrice("");
 		setMaxPrice("");
 		setMinRating("");
 		setSuccess(null);
-
-		try {
-			await loadData();
-		} catch (e) {
-			console.error(e);
-			setError("Не вдалося скинути фільтри. Будь ласка, спробуйте пізніше.");
-		}
-	}, [loadData]);
+	}, []);
 
 	const compareList = useMemo(() => {
 		return products.filter((p) => p.uuid && compareUuids.includes(p.uuid));
@@ -249,87 +195,105 @@ const HomePage: React.FC = () => {
 				</Alert>
 			)}
 
-			<Box sx={{ mb: 4 }}>
-				<Typography variant="h5" sx={{ mb: 2 }}>
-					Категорії
-				</Typography>
-				<Grid container spacing={2}>
-					{categories.map((cat) => (
-						<Grid item key={cat.id}>
-							<CategoryCard
-								category={cat}
-								onClick={() => handleSelectCategory(cat.name)}
-							/>
-						</Grid>
-					))}
-				</Grid>
-			</Box>
+			{!selectedCategory && (
+				<Box sx={{ mb: 4 }}>
+					<Typography variant="h5" sx={{ mb: 2 }}>
+						<strong>Категорії</strong>
+					</Typography>
+					<Grid container spacing={2}>
+						{categories.map((cat) => (
+							<Grid item key={cat.id}>
+								<CategoryCard
+									category={cat}
+									onClick={() => handleSelectCategory(cat.name)}
+								/>
+							</Grid>
+						))}
+					</Grid>
+				</Box>
+			)}
 
-			<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
-				<Select
-					value={brand}
-					onChange={(e) => setBrand(e.target.value)}
-					displayEmpty
-					sx={{ width: 180 }}
-				>
-					<MenuItem value="">Усі бренди</MenuItem>
-					{allBrands.map((b) => (
-						<MenuItem key={b} value={b}>
-							{b}
-						</MenuItem>
-					))}
-				</Select>
-				<TextField
-					label="Мінімальна ціна"
-					type="number"
-					value={minPrice}
-					onChange={(e) =>
-						setMinPrice(e.target.value ? parseInt(e.target.value, 10) : "")
-					}
-				/>
-				<TextField
-					label="Максимальна ціна"
-					type="number"
-					value={maxPrice}
-					onChange={(e) =>
-						setMaxPrice(e.target.value ? parseInt(e.target.value, 10) : "")
-					}
-				/>
-				<TextField
-					label="Мінімальний рейтинг"
-					type="number"
-					value={minRating}
-					onChange={(e) =>
-						setMinRating(e.target.value ? parseInt(e.target.value, 10) : "")
-					}
-				/>
-				<Button variant="outlined" onClick={handleFilter} color="primary">
-					Фільтрувати
-				</Button>
-				<Button variant="outlined" onClick={resetFiltersMain} color="secondary">
-					Скинути
-				</Button>
-			</Box>
+			{selectedCategory && (
+				<>
+					<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+						<Button variant="outlined" onClick={() => setSelectedCategory("")}>
+							Назад до категорій
+						</Button>
+					</Box>
 
-			<Grid container spacing={3}>
-				{filteredProducts.map((prod) => {
-					const inCompare = prod.uuid
-						? compareUuids.includes(prod.uuid)
-						: false;
-					return (
-						<Grid item xs={12} sm={6} md={4} key={prod._id || prod.uuid}>
-							<ProductCard
-								product={prod}
-								showCompareButton={true}
-								inCompare={inCompare}
-								toggleCompare={toggleCompare}
-								compareListLength={compareList.length}
-								maxCompareItems={MAX_COMPARE_ITEMS}
-							/>
-						</Grid>
-					);
-				})}
-			</Grid>
+					<Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
+						<Select
+							value={brand}
+							onChange={(e) => setBrand(e.target.value)}
+							displayEmpty
+							sx={{ width: 180 }}
+						>
+							<MenuItem value="">Усі бренди</MenuItem>
+							{Array.from(
+								new Set(products.map((p) => p.brand).filter(Boolean)),
+							).map((b) => (
+								<MenuItem key={b} value={b}>
+									{b}
+								</MenuItem>
+							))}
+						</Select>
+						<TextField
+							label="Мінімальна ціна"
+							type="number"
+							value={minPrice}
+							onChange={(e) =>
+								setMinPrice(e.target.value ? parseInt(e.target.value, 10) : "")
+							}
+						/>
+						<TextField
+							label="Максимальна ціна"
+							type="number"
+							value={maxPrice}
+							onChange={(e) =>
+								setMaxPrice(e.target.value ? parseInt(e.target.value, 10) : "")
+							}
+						/>
+						<TextField
+							label="Мінімальний рейтинг"
+							type="number"
+							value={minRating}
+							onChange={(e) =>
+								setMinRating(e.target.value ? parseInt(e.target.value, 10) : "")
+							}
+						/>
+						<Button variant="outlined" onClick={handleFilter} color="primary">
+							Фільтрувати
+						</Button>
+						<Button
+							variant="outlined"
+							onClick={resetFiltersMain}
+							color="secondary"
+						>
+							Скинути
+						</Button>
+					</Box>
+
+					<Grid container spacing={3} sx={{ mb: 2 }}>
+						{filteredProducts.map((prod) => {
+							const inCompare = prod.uuid
+								? compareUuids.includes(prod.uuid)
+								: false;
+							return (
+								<Grid item xs={12} sm={6} md={4} key={prod._id || prod.uuid}>
+									<ProductCard
+										product={prod}
+										showCompareButton={true}
+										inCompare={inCompare}
+										toggleCompare={toggleCompare}
+										compareListLength={compareList.length}
+										maxCompareItems={MAX_COMPARE_ITEMS}
+									/>
+								</Grid>
+							);
+						})}
+					</Grid>
+				</>
+			)}
 
 			<CompareTable
 				products={compareList}

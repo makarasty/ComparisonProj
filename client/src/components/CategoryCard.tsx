@@ -18,7 +18,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
 		<Card
 			variant="outlined"
 			sx={{
-				width: 200,
+				width: 280,
 				borderRadius: 2,
 				overflow: "hidden",
 				mx: "auto",
@@ -28,13 +28,13 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onClick }) => {
 			<CardActionArea onClick={onClick}>
 				<CardMedia
 					component="img"
-					height="140"
+					height="160"
 					image={category.image || "/images/unknown.jpg"}
 					alt={category.name}
 					sx={{ objectFit: "cover" }}
 				/>
 				<CardContent sx={{ textAlign: "center" }}>
-					<Typography variant="h6" noWrap>
+					<Typography variant="h6" noWrap fontWeight="bold">
 						{category.name}
 					</Typography>
 				</CardContent>
