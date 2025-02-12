@@ -211,6 +211,7 @@ const AdminPage: React.FC = () => {
 							<TableCell>Зображення</TableCell>
 							<TableCell>Назва</TableCell>
 							<TableCell>Бренд</TableCell>
+							<TableCell>Опис</TableCell>
 							<TableCell>Ціна</TableCell>
 							<TableCell>Рейтинг</TableCell>
 							<TableCell>В наявності</TableCell>
@@ -239,15 +240,52 @@ const AdminPage: React.FC = () => {
 										"-"
 									)}
 								</TableCell>
-								<TableCell>
+
+								<TableCell
+									sx={{
+										maxWidth: 180,
+										whiteSpace: "nowrap",
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+									}}
+								>
 									<Tooltip title={prod.title}>
-										<span style={{ fontWeight: 500 }}>{prod.title}</span>
+										<span>{prod.title}</span>
 									</Tooltip>
 								</TableCell>
-								<TableCell>{prod.brand || "-"}</TableCell>
+
+								<TableCell
+									sx={{
+										maxWidth: 130,
+										whiteSpace: "nowrap",
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+									}}
+								>
+									<Tooltip title={prod.brand || ""}>
+										<span>{prod.brand || "-"}</span>
+									</Tooltip>
+								</TableCell>
+
+								<TableCell
+									sx={{
+										maxWidth: 300,
+										whiteSpace: "nowrap",
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+									}}
+								>
+									<Tooltip title={prod.description || ""}>
+										<span>{prod.description || "-"}</span>
+									</Tooltip>
+								</TableCell>
+
 								<TableCell>${prod.price}</TableCell>
+
 								<TableCell>{prod.rating ?? 0}</TableCell>
+
 								<TableCell>{prod.stock > 0 ? "так" : "ні"}</TableCell>
+
 								<TableCell>
 									<IconButton
 										size="small"
@@ -269,7 +307,7 @@ const AdminPage: React.FC = () => {
 
 						{filteredProducts.length === 0 && (
 							<TableRow>
-								<TableCell colSpan={7} align="center">
+								<TableCell colSpan={8} align="center">
 									Нічого не знайдено...
 								</TableCell>
 							</TableRow>

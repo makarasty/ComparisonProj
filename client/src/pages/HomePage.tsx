@@ -142,6 +142,42 @@ const HomePage: React.FC = () => {
 		return result;
 	}, [products]);
 
+	const brandOptions = useMemo(() => {
+		if (!selectedCategory) {
+			return Array.from(new Set(products.map((p) => p.brand).filter(Boolean)));
+		} else if (selectedCategory === "Інше") {
+			const smallCats: string[] = [];
+			const catCount: Record<string, number> = {};
+
+			products.forEach((p) => {
+				const cat = p.category || "NOCAT";
+				catCount[cat] = (catCount[cat] || 0) + 1;
+			});
+
+			Object.entries(catCount).forEach(([cat, count]) => {
+				if (count <= 3) smallCats.push(cat);
+			});
+
+			return Array.from(
+				new Set(
+					products
+						.filter((p) => smallCats.includes(p.category || "NOCAT"))
+						.map((p) => p.brand)
+						.filter(Boolean),
+				),
+			);
+		} else {
+			return Array.from(
+				new Set(
+					products
+						.filter((p) => p.category === selectedCategory)
+						.map((p) => p.brand)
+						.filter(Boolean),
+				),
+			);
+		}
+	}, [selectedCategory, products]);
+
 	const filteredProducts = useProductFilters({
 		allProducts: products,
 		selectedCategory,
@@ -155,12 +191,11 @@ const HomePage: React.FC = () => {
 		setSelectedCategory(catName === "Інше" ? "Інше" : catName);
 	};
 
-	const handleFilter = async () => {
+	const handleFilter = useCallback(() => {
 		setSuccess(null);
-	};
+	}, []);
 
 	const resetFiltersMain = useCallback(() => {
-		setSelectedCategory("");
 		setBrand("");
 		setMinPrice("");
 		setMaxPrice("");
@@ -229,9 +264,7 @@ const HomePage: React.FC = () => {
 							sx={{ width: 180 }}
 						>
 							<MenuItem value="">Усі бренди</MenuItem>
-							{Array.from(
-								new Set(products.map((p) => p.brand).filter(Boolean)),
-							).map((b) => (
+							{brandOptions.map((b) => (
 								<MenuItem key={b} value={b}>
 									{b}
 								</MenuItem>
