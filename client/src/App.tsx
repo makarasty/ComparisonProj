@@ -6,6 +6,8 @@ import {
 	Link,
 	Navigate,
 } from "react-router-dom";
+
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
 	CssBaseline,
 	AppBar,
@@ -16,7 +18,7 @@ import {
 	IconButton,
 	CircularProgress,
 } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 
@@ -24,6 +26,7 @@ import HomePage from "./pages/HomePage";
 import AdminPage from "./pages/AdminPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+
 import { getCurrentUser, logout } from "./services/authService";
 
 const App: React.FC = () => {
@@ -37,6 +40,7 @@ const App: React.FC = () => {
 	});
 
 	const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	useEffect(() => {
@@ -52,25 +56,49 @@ const App: React.FC = () => {
 		} else {
 			setCurrentUserRole(null);
 		}
-
 		setIsLoading(false);
 	}, []);
-
-	const theme = React.useMemo(
-		() =>
-			createTheme({
-				palette: {
-					mode: darkMode ? "dark" : "light",
-				},
-			}),
-		[darkMode],
-	);
 
 	const handleLogout = () => {
 		logout();
 		setCurrentUserRole(null);
 		window.location.href = "/";
 	};
+
+	const theme = React.useMemo(() => {
+		if (darkMode) {
+			return createTheme({
+				palette: {
+					mode: "dark",
+					primary: { main: "#5865F2" },
+					secondary: { main: "#57F287" },
+					background: {
+						default: "#161515",
+						paper: "#23272A",
+					},
+					text: {
+						primary: "#FFFFFF",
+						secondary: "#DCDDDE",
+					},
+				},
+			});
+		} else {
+			return createTheme({
+				palette: {
+					mode: "light",
+					primary: { main: "#1976d2" },
+					secondary: { main: "#ff9800" },
+					background: {
+						default: "#f6f9fc",
+						paper: "#ffffff",
+					},
+					text: {
+						primary: "#333333",
+					},
+				},
+			});
+		}
+	}, [darkMode]);
 
 	return (
 		<ThemeProvider theme={theme}>
@@ -130,16 +158,13 @@ const App: React.FC = () => {
 								element={<LoginPage setRole={setCurrentUserRole} />}
 							/>
 							<Route path="/register" element={<RegisterPage />} />
+
 							<Route
 								path="/admin"
 								element={
 									isLoading ? (
 										<Box
-											sx={{
-												display: "flex",
-												justifyContent: "center",
-												mt: 10,
-											}}
+											sx={{ display: "flex", justifyContent: "center", mt: 10 }}
 										>
 											<CircularProgress />
 										</Box>
@@ -157,7 +182,7 @@ const App: React.FC = () => {
 						sx={{
 							textAlign: "center",
 							py: 2,
-							bgcolor: darkMode ? "#1c1c1c" : "#e0e0e0",
+							bgcolor: darkMode ? "#161515" : "#e0e0e0",
 						}}
 					>
 						<Typography variant="body2">© 2025 MKY was here</Typography>
