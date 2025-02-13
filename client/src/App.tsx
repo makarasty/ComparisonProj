@@ -1,6 +1,11 @@
-import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import React, { useState, useEffect } from "react";
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+	Link,
+	Navigate,
+} from "react-router-dom";
 import {
 	CssBaseline,
 	AppBar,
@@ -9,12 +14,17 @@ import {
 	Box,
 	Button,
 	IconButton,
+	CircularProgress,
 } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 import HomePage from "./pages/HomePage";
 import AdminPage from "./pages/AdminPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import { getCurrentUser, logout } from "./services/authService";
 
 const App: React.FC = () => {
 	const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -26,48 +36,59 @@ const App: React.FC = () => {
 		}
 	});
 
-	React.useEffect(() => {
+	const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(true);
+
+	useEffect(() => {
 		localStorage.setItem("darkMode", JSON.stringify(darkMode));
 	}, [darkMode]);
+
+	useEffect(() => {
+		const user = getCurrentUser();
+		if (user?.role === "admin") {
+			setCurrentUserRole("admin");
+		} else if (user?.role === "user") {
+			setCurrentUserRole("user");
+		} else {
+			setCurrentUserRole(null);
+		}
+
+		setIsLoading(false);
+	}, []);
 
 	const theme = React.useMemo(
 		() =>
 			createTheme({
 				palette: {
 					mode: darkMode ? "dark" : "light",
-					primary: { main: "#1976d2" },
-					secondary: { main: "#ff9800" },
-					success: { main: "#2e7d32" },
-					info: { main: "#0288d1" },
-					warning: { main: "#ffeb3b" },
-					error: { main: "#d32f2f" },
-					background: {
-						default: darkMode ? "#121212" : "#f6f9fc",
-						paper: darkMode ? "#1e1e1e" : "#ffffff",
-					},
-					text: {
-						primary: darkMode ? "#ffffff" : "#333333",
-					},
 				},
 			}),
 		[darkMode],
 	);
 
+	const handleLogout = () => {
+		logout();
+		setCurrentUserRole(null);
+		window.location.href = "/";
+	};
+
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
 			<Box
-				sx={{
-					display: "flex",
-					flexDirection: "column",
-					minHeight: "100vh",
-				}}
+				sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
 			>
 				<Router>
 					<AppBar position="static">
 						<Toolbar>
-							<Typography variant="h6" sx={{ flexGrow: 1 }}>
-								Магазин
+							<Typography
+								variant="h6"
+								sx={{ cursor: "pointer", flexGrow: 1 }}
+								onClick={() => {
+									window.location.href = "/";
+								}}
+							>
+								МАГАЗИН
 							</Typography>
 							<IconButton
 								color="inherit"
@@ -75,13 +96,27 @@ const App: React.FC = () => {
 							>
 								{darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
 							</IconButton>
+
 							<Box sx={{ display: "flex", gap: 2, ml: 2 }}>
-								<Button component={Link} to="/" color="inherit">
-									Головна
-								</Button>
-								<Button component={Link} to="/admin" color="inherit">
-									Адміністрування
-								</Button>
+								{currentUserRole === "admin" && (
+									<Button component={Link} to="/admin" color="inherit">
+										Адміністрування
+									</Button>
+								)}
+								{currentUserRole ? (
+									<Button onClick={handleLogout} color="inherit">
+										Вийти
+									</Button>
+								) : (
+									<>
+										<Button component={Link} to="/login" color="inherit">
+											Увійти
+										</Button>
+										<Button component={Link} to="/register" color="inherit">
+											Реєстрація
+										</Button>
+									</>
+								)}
 							</Box>
 						</Toolbar>
 					</AppBar>
@@ -89,7 +124,32 @@ const App: React.FC = () => {
 					<Box sx={{ flexGrow: 1, px: { xs: 2, md: 4 } }}>
 						<Routes>
 							<Route path="/" element={<HomePage />} />
-							<Route path="/admin" element={<AdminPage />} />
+
+							<Route
+								path="/login"
+								element={<LoginPage setRole={setCurrentUserRole} />}
+							/>
+							<Route path="/register" element={<RegisterPage />} />
+							<Route
+								path="/admin"
+								element={
+									isLoading ? (
+										<Box
+											sx={{
+												display: "flex",
+												justifyContent: "center",
+												mt: 10,
+											}}
+										>
+											<CircularProgress />
+										</Box>
+									) : currentUserRole === "admin" ? (
+										<AdminPage />
+									) : (
+										<Navigate to="/login" replace />
+									)
+								}
+							/>
 						</Routes>
 					</Box>
 

@@ -12,7 +12,6 @@ export async function getDeviceById(id: string): Promise<IProduct | null> {
 
 export async function createDevice(data: IProduct): Promise<IProduct> {
 	const d = new DeviceModel(data);
-
 	return d.save();
 }
 
@@ -29,8 +28,6 @@ export async function deleteDevice(id: string): Promise<IProduct | null> {
 
 export async function insertDevices(): Promise<IProduct[]> {
 	const s = await getAllProducts();
-
 	await DeviceModel.deleteMany({});
-
 	return DeviceModel.insertMany(s);
 }

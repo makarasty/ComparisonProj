@@ -8,6 +8,7 @@ import {
 	TextField,
 	Button,
 } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { IProduct } from "../types/product";
 
 interface ProductFormProps {
@@ -118,7 +119,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Скасувати</Button>
-				<Button variant="contained" color="success" onClick={handleSubmit}>
+				<Button
+					variant="contained"
+					color="success"
+					onClick={handleSubmit}
+					startIcon={<CheckCircleIcon />}
+				>
 					Зберегти
 				</Button>
 			</DialogActions>

@@ -8,13 +8,17 @@ import {
 	seedDevices,
 } from "../controllers/deviceController";
 
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { adminMiddleware } from "../middlewares/adminMiddleware";
+
 const router = Router();
 
-router.get("/", (req, res) => void getDevices(req, res));
-router.post("/", (req, res) => void createDevice(req, res));
-router.get("/:id", (req, res) => void getDeviceById(req, res));
-router.put("/:id", (req, res) => void updateDevice(req, res));
-router.delete("/:id", (req, res) => void deleteDevice(req, res));
-router.get("/seed/devices", (req, res) => void seedDevices(req, res));
+router.get("/", getDevices);
+router.get("/:id", getDeviceById);
+
+router.post("/", authMiddleware, adminMiddleware, createDevice);
+router.put("/:id", authMiddleware, adminMiddleware, updateDevice);
+router.delete("/:id", authMiddleware, adminMiddleware, deleteDevice);
+router.get("/seed/devices", authMiddleware, adminMiddleware, seedDevices);
 
 export default router;

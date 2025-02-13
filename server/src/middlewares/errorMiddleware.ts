@@ -1,29 +1,23 @@
 import { Request, Response, NextFunction } from "express";
-import { error } from "../utils/responseHandler";
 
 export function notFoundHandler(
 	req: Request,
 	res: Response,
-	next: NextFunction,
-) {
+	_next: NextFunction,
+): void {
 	const msg = `Route ${req.originalUrl} not found`;
-
-	return error(res, msg, 404);
+	res.status(404).json({ status: "error", message: msg });
 }
 
 export function globalErrorHandler(
-	err: any,
-	req: Request,
+	err: unknown,
+	_req: Request,
 	res: Response,
-	next: NextFunction,
-) {
-	if (err.isJoi) {
-		const details = err.details.map((d: any) => d.message).join(", ");
-		return error(res, `Validation error: ${details}`, 422);
-	}
-
-	const s = err.statusCode || 500;
-	const m = err.message || "Internal Server Error";
-
-	return error(res, m, s);
+	_next: NextFunction,
+): void {
+	console.error("Global Error Handler:", err);
+	res.status(500).json({
+		status: "error",
+		message: "Internal Server Error",
+	});
 }
