@@ -29,14 +29,14 @@ const warrantySchema = new Schema(
 
 const metadataSchema = new Schema(
 	{
-		isNewProduct: { type: Boolean, default: false },
+		isBrandNew: { type: Boolean, default: false },
 		isFeatured: { type: Boolean, default: false },
 		isPopular: { type: Boolean, default: false },
 	},
 	{ _id: false },
 );
 
-const productSchema = new Schema(
+const productSchema = new Schema<ProductDocument>(
 	{
 		uuid: {
 			type: Number,
@@ -62,19 +62,16 @@ const productSchema = new Schema(
 		},
 		brand: {
 			type: String,
-			required: false,
 			trim: true,
 			index: true,
 		},
 		category: {
 			type: String,
-			required: false,
 			trim: true,
 			index: true,
 		},
 		image: {
 			type: String,
-			required: false,
 			trim: true,
 		},
 		images: [
@@ -85,14 +82,12 @@ const productSchema = new Schema(
 		],
 		rating: {
 			type: Number,
-			required: false,
 			min: 0,
 			max: 5,
 			default: 0,
 		},
 		stock: {
 			type: Number,
-			required: false,
 			min: 0,
 			default: 0,
 		},
@@ -113,20 +108,16 @@ const productSchema = new Schema(
 		],
 		dimensions: {
 			type: dimensionsSchema,
-			required: false,
 		},
 		specifications: {
 			type: Map,
 			of: Schema.Types.Mixed,
-			required: false,
 		},
 		warranty: {
 			type: warrantySchema,
-			required: false,
 		},
 		metadata: {
 			type: metadataSchema,
-			required: false,
 		},
 	},
 	{
@@ -139,7 +130,7 @@ const productSchema = new Schema(
 
 productSchema.index({ title: "text", description: "text" });
 productSchema.index({ price: 1 });
-productSchema.index({ "metadata.isNewProduct": 1 });
+productSchema.index({ "metadata.isBrandNew": 1 });
 productSchema.index({ "metadata.isFeatured": 1 });
 productSchema.index({ "metadata.isPopular": 1 });
 

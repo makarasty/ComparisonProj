@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import bcrypt from "bcrypt";
 import type { CallbackError } from "mongoose";
 
@@ -9,7 +9,7 @@ export interface IUser {
 	role: "admin" | "user";
 }
 
-export interface IUserDocument extends IUser, Document {
+export interface IUserDocument extends IUser, Document<Types.ObjectId> {
 	comparePassword(password: string): Promise<boolean>;
 }
 

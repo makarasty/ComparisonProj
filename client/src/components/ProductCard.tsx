@@ -39,6 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 	onEdit,
 }) => {
 	const [showFullImage, setShowFullImage] = useState(false);
+
 	const buttonLabel = inCompare
 		? "Видалити з порівняння"
 		: "Додати до порівняння";

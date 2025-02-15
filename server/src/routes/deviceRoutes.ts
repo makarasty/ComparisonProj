@@ -6,10 +6,10 @@ import {
 	updateDevice,
 	deleteDevice,
 	seedDevices,
-} from "../controllers/deviceController";
+} from "../controllers/DeviceController";
 
-import { authMiddleware } from "../middlewares/authMiddleware";
-import { adminMiddleware } from "../middlewares/adminMiddleware";
+import { authMiddleware } from "../middlewares/AuthMiddleware";
+import { adminMiddleware } from "../middlewares/AdminMiddleware";
 
 const router = Router();
 

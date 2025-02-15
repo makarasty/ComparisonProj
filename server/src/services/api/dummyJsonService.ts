@@ -1,4 +1,4 @@
-import { fetchJSON } from "../../utils/fetchJSON";
+import { fetchJSON } from "../helpers/fetchJSON";
 import { IProduct } from "../../interfaces/Product";
 
 interface DummyJsonCategoryResponse {
@@ -71,7 +71,7 @@ function mapDummyJsonToProduct(item: DummyJsonProduct): IProduct {
 		discount: item.discountPercentage,
 		dimensions: undefined,
 		metadata: {
-			isNew: false,
+			isBrandNew: false,
 			isFeatured: item.rating > 4.5,
 			isPopular: item.stock < 50,
 		},

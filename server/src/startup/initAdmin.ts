@@ -1,8 +1,8 @@
-import UserModel from "../models/userModel";
+import UserModel from "../models/UserModel";
 
 export async function createAdminUserIfNotExists(): Promise<void> {
 	try {
-		const adminEmail = "m@k.y";
+		const adminEmail = "ma@ka.rasty";
 		const existingAdmin = await UserModel.findOne({ email: adminEmail }).exec();
 		if (!existingAdmin) {
 			await UserModel.create({

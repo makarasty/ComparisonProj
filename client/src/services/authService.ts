@@ -31,6 +31,9 @@ export async function registerUser(
 	const resp: AxiosResponse<IRegisterResponse> = await axios.post(
 		`${AUTH_API_URL}/register`,
 		data,
+		{
+			headers: { "Content-Type": "application/json" },
+		},
 	);
 	return resp.data;
 }
@@ -41,9 +44,9 @@ export async function login(
 ): Promise<ILoginResponse> {
 	const resp: AxiosResponse<ILoginResponse> = await axios.post(
 		`${AUTH_API_URL}/login`,
+		{ email, password },
 		{
-			email,
-			password,
+			headers: { "Content-Type": "application/json" },
 		},
 	);
 	if (resp.data.token) {
@@ -73,9 +76,7 @@ export function getCurrentUser(): {
 		const jsonPayload = decodeURIComponent(
 			atob(base64)
 				.split("")
-				.map((c) => {
-					return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-				})
+				.map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
 				.join(""),
 		);
 		const parsed = JSON.parse(jsonPayload);

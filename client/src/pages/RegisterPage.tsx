@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Box, Typography, TextField, Button, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/authService";
+import axios from "axios";
 
 const RegisterPage: React.FC = () => {
 	const [name, setName] = useState("");
@@ -46,7 +47,15 @@ const RegisterPage: React.FC = () => {
 			}
 		} catch (e: unknown) {
 			console.error(e);
-			setError("Помилка при реєстрації. Спробуйте пізніше.");
+			if (axios.isAxiosError(e)) {
+				if (e.response?.data && typeof e.response.data.message === "string") {
+					setError(e.response.data.message);
+				} else {
+					setError(e.message);
+				}
+			} else {
+				setError("Сталася помилка при реєстрації. Спробуйте пізніше.");
+			}
 		}
 	};
 

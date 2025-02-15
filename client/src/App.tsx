@@ -38,9 +38,7 @@ const App: React.FC = () => {
 			return false;
 		}
 	});
-
 	const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	useEffect(() => {
@@ -116,7 +114,7 @@ const App: React.FC = () => {
 									window.location.href = "/";
 								}}
 							>
-								МАГАЗИН
+								COMPARE-PROJ
 							</Typography>
 							<IconButton
 								color="inherit"
@@ -124,7 +122,6 @@ const App: React.FC = () => {
 							>
 								{darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
 							</IconButton>
-
 							<Box sx={{ display: "flex", gap: 2, ml: 2 }}>
 								{currentUserRole === "admin" && (
 									<Button component={Link} to="/admin" color="inherit">
@@ -152,13 +149,11 @@ const App: React.FC = () => {
 					<Box sx={{ flexGrow: 1, px: { xs: 2, md: 4 } }}>
 						<Routes>
 							<Route path="/" element={<HomePage />} />
-
 							<Route
 								path="/login"
 								element={<LoginPage setRole={setCurrentUserRole} />}
 							/>
 							<Route path="/register" element={<RegisterPage />} />
-
 							<Route
 								path="/admin"
 								element={

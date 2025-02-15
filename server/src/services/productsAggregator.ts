@@ -1,8 +1,4 @@
 import { IProduct } from "../interfaces/Product";
-
-//import { getFakeStoreApiProducts } from "./api/trash/fakestoreApiService";
-//import { getEscuelaJsProducts } from "./api/trash/escuelajsService";
-//import { getBeeceptorProducts } from "./api/trash/beeceptorService";
 import { getAllDummyJsonProducts } from "./api/dummyJsonService";
 import { getAllFakeStoreProducts } from "./api/fakestoreApiService";
 

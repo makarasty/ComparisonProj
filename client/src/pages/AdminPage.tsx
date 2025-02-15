@@ -20,6 +20,7 @@ import {
 	DialogTitle,
 	DialogContent,
 	DialogActions,
+	CircularProgress,
 } from "@mui/material";
 
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -59,9 +60,6 @@ const AdminPage: React.FC = () => {
 	useScrollToTopOnMessages(success, error);
 
 	const [searchTerm, setSearchTerm] = useState("");
-
-	const navigate = useNavigate();
-
 	const [openImageViewer, setOpenImageViewer] = useState(false);
 	const [imageToView, setImageToView] = useState<string>("");
 
@@ -71,10 +69,13 @@ const AdminPage: React.FC = () => {
 
 	const [users, setUsers] = useState<IUser[]>([]);
 	const [activeTab, setActiveTab] = useState(0);
-
 	const [userEditModalOpen, setUserEditModalOpen] = useState(false);
 	const [selectedUserId, setSelectedUserId] = useState<string>("");
 	const [userNameField, setUserNameField] = useState<string>("");
+
+	const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
+
+	const navigate = useNavigate();
 
 	const handleChangeTab = (_: React.SyntheticEvent, newValue: number) => {
 		setActiveTab(newValue);
@@ -188,11 +189,14 @@ const AdminPage: React.FC = () => {
 
 	const loadUsers = async () => {
 		try {
+			setLoadingUsers(true);
 			const data = await fetchAllUsers();
 			setUsers(data);
 		} catch (e: unknown) {
 			console.error(e);
 			setError("Помилка при завантаженні списку користувачів");
+		} finally {
+			setLoadingUsers(false);
 		}
 	};
 
@@ -416,11 +420,9 @@ const AdminPage: React.FC = () => {
 												<span>{prod.description || "-"}</span>
 											</Tooltip>
 										</TableCell>
-
 										<TableCell>${prod.price}</TableCell>
 										<TableCell>{prod.rating ?? 0}</TableCell>
 										<TableCell>{prod.stock > 0 ? "так" : "ні"}</TableCell>
-
 										<TableCell>
 											<IconButton
 												size="small"
@@ -439,7 +441,6 @@ const AdminPage: React.FC = () => {
 										</TableCell>
 									</TableRow>
 								))}
-
 								{filteredProducts.length === 0 && (
 									<TableRow>
 										<TableCell colSpan={8} align="center">
@@ -478,67 +479,72 @@ const AdminPage: React.FC = () => {
 							Оновити список користувачів
 						</Button>
 					</Box>
-
-					<TableContainer component={Paper} elevation={3} sx={{ mt: 2 }}>
-						<Table>
-							<TableHead>
-								<TableRow>
-									<TableCell>Ім'я</TableCell>
-									<TableCell>Email</TableCell>
-									<TableCell>Роль</TableCell>
-									<TableCell>Дії</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{users.map((u) => (
-									<TableRow key={u._id}>
-										<TableCell>
-											<Tooltip
-												componentsProps={{
-													tooltip: {
-														sx: {
-															maxWidth: 300,
-															whiteSpace: "normal",
-															wordWrap: "break-word",
-														},
-													},
-												}}
-												title={u.name || ""}
-												placement="top"
-											>
-												<span>{u.name}</span>
-											</Tooltip>
-										</TableCell>
-										<TableCell>{u.email}</TableCell>
-										<TableCell>{u.role}</TableCell>
-										<TableCell>
-											<IconButton
-												size="small"
-												color="primary"
-												onClick={() => handleEditUser(u)}
-											>
-												<EditNoteIcon />
-											</IconButton>
-											<IconButton
-												size="small"
-												color="error"
-												onClick={() => void handleDeleteUser(u._id)}
-											>
-												<DeleteForeverIcon />
-											</IconButton>
-										</TableCell>
-									</TableRow>
-								))}
-								{users.length === 0 && (
+					{loadingUsers ? (
+						<Box sx={{ textAlign: "center", mt: 5 }}>
+							<CircularProgress />
+						</Box>
+					) : (
+						<TableContainer component={Paper} elevation={3} sx={{ mt: 2 }}>
+							<Table>
+								<TableHead>
 									<TableRow>
-										<TableCell colSpan={4} align="center">
-											Немає користувачів
-										</TableCell>
+										<TableCell>Ім'я</TableCell>
+										<TableCell>Email</TableCell>
+										<TableCell>Роль</TableCell>
+										<TableCell>Дії</TableCell>
 									</TableRow>
-								)}
-							</TableBody>
-						</Table>
-					</TableContainer>
+								</TableHead>
+								<TableBody>
+									{users.map((u) => (
+										<TableRow key={u._id}>
+											<TableCell>
+												<Tooltip
+													componentsProps={{
+														tooltip: {
+															sx: {
+																maxWidth: 300,
+																whiteSpace: "normal",
+																wordWrap: "break-word",
+															},
+														},
+													}}
+													title={u.name || ""}
+													placement="top"
+												>
+													<span>{u.name}</span>
+												</Tooltip>
+											</TableCell>
+											<TableCell>{u.email}</TableCell>
+											<TableCell>{u.role}</TableCell>
+											<TableCell>
+												<IconButton
+													size="small"
+													color="primary"
+													onClick={() => handleEditUser(u)}
+												>
+													<EditNoteIcon />
+												</IconButton>
+												<IconButton
+													size="small"
+													color="error"
+													onClick={() => void handleDeleteUser(u._id)}
+												>
+													<DeleteForeverIcon />
+												</IconButton>
+											</TableCell>
+										</TableRow>
+									))}
+									{users.length === 0 && (
+										<TableRow>
+											<TableCell colSpan={4} align="center">
+												Немає користувачів
+											</TableCell>
+										</TableRow>
+									)}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					)}
 				</>
 			)}
 

@@ -1,4 +1,4 @@
-import { fetchJSON } from "../../utils/fetchJSON";
+import { fetchJSON } from "../helpers/fetchJSON";
 import { IProduct } from "../../interfaces/Product";
 
 type FakeStoreProduct = {
@@ -67,7 +67,7 @@ function mapFakeStoreToProduct(item: FakeStoreProduct): IProduct {
 		discount: undefined,
 		dimensions: undefined,
 		metadata: {
-			isNew: false,
+			isBrandNew: false,
 			isFeatured: item.rating.rate > 4,
 			isPopular: item.rating.count > 100,
 		},

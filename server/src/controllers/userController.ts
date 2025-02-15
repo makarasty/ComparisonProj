@@ -1,63 +1,58 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
-import UserModel, { IUserDocument } from "../models/userModel";
+import userRepository from "../repositories/UserRepository";
+import { userUpdateSchema } from "../validators/UserValidators";
 
 export const getAllUsers: RequestHandler = async (
-	_req: Request,
-	res: Response,
-	next: NextFunction,
+	_req,
+	res,
+	next,
 ): Promise<void> => {
 	try {
-		const users = await UserModel.find().select("-password");
+		const users = await userRepository.findAll();
 		res.json({ data: users });
 	} catch (error) {
 		next(error);
 	}
 };
 
-export const deleteUser: RequestHandler = async (
-	req: Request,
-	res: Response,
-	next: NextFunction,
+export const updateUser: RequestHandler = async (
+	req,
+	res,
+	next,
 ): Promise<void> => {
 	try {
+		const parsed = userUpdateSchema.safeParse(req.body);
+		if (!parsed.success) {
+			res.status(400).json({
+				message: parsed.error.errors.map((e) => e.message).join(", "),
+			});
+			return;
+		}
 		const { id } = req.params;
-		const user = await UserModel.findByIdAndDelete(id);
+		const user = await userRepository.updateUser(id, parsed.data);
 		if (!user) {
 			res.status(404).json({ message: "Користувача не знайдено" });
 			return;
 		}
-		res.json({ message: "Користувача успішно видалено" });
+		res.json({ data: user });
 	} catch (error) {
 		next(error);
 	}
 };
 
-export const updateUser: RequestHandler = async (
-	req: Request,
-	res: Response,
-	next: NextFunction,
+export const deleteUser: RequestHandler = async (
+	req,
+	res,
+	next,
 ): Promise<void> => {
 	try {
 		const { id } = req.params;
-		const { name } = req.body;
-
-		if (!name || typeof name !== "string" || !name.trim()) {
-			res.status(400).json({ message: "Невалідне ім’я" });
-			return;
-		}
-
-		const user: IUserDocument | null = await UserModel.findByIdAndUpdate(
-			id,
-			{ name },
-			{ new: true },
-		).select("-password");
-
+		const user = await userRepository.deleteUser(id);
 		if (!user) {
 			res.status(404).json({ message: "Користувача не знайдено" });
 			return;
 		}
-
-		res.json({ data: user });
+		res.json({ message: "Користувача успішно видалено" });
 	} catch (error) {
 		next(error);
 	}

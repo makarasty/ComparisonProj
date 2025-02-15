@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import cors from "cors";
@@ -6,15 +6,15 @@ import helmet from "helmet";
 import compression from "compression";
 
 import connectDB from "./config/db";
-import authRoutes from "./routes/authRoutes";
-import deviceRoutes from "./routes/deviceRoutes";
-import userRoutes from "./routes/userRoutes";
+import authRoutes from "./routes/AuthRoutes";
+import deviceRoutes from "./routes/DeviceRoutes";
+import userRoutes from "./routes/UserRoutes";
 import {
 	notFoundHandler,
 	globalErrorHandler,
-} from "./middlewares/errorMiddleware";
+} from "./middlewares/ErrorMiddleware";
 
-import { createAdminUserIfNotExists } from "./utils/initAdmin";
+import { createAdminUserIfNotExists } from "./startup/initAdmin";
 
 dotenv.config();
 

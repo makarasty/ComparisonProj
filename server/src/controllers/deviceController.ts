@@ -1,28 +1,34 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
-import * as deviceService from "../utils/databaseUtils";
+import { Request, Response, NextFunction } from "express";
+import {
+	getAllDevicesService,
+	getDeviceByIdService,
+	createDeviceService,
+	updateDeviceService,
+	deleteDeviceService,
+	seedDevicesService,
+} from "../services/device/DeviceService";
 
-export const getDevices: RequestHandler = async (
-	req: Request,
+export async function getDevices(
+	_req: Request,
 	res: Response,
 	next: NextFunction,
-): Promise<void> => {
+): Promise<void> {
 	try {
-		const devices = await deviceService.getAllDevices();
+		const devices = await getAllDevicesService();
 		res.json({ data: devices });
 	} catch (error) {
 		next(error);
 	}
-};
+}
 
-export const getDeviceById: RequestHandler = async (
+export async function getDeviceById(
 	req: Request,
 	res: Response,
 	next: NextFunction,
-): Promise<void> => {
+): Promise<void> {
 	try {
 		const { id } = req.params;
-		const device = await deviceService.getDeviceById(id);
-
+		const device = await getDeviceByIdService(id);
 		if (!device) {
 			res.status(404).json({ message: "Device not found" });
 			return;
@@ -31,79 +37,74 @@ export const getDeviceById: RequestHandler = async (
 	} catch (error) {
 		next(error);
 	}
-};
+}
 
-export const createDevice: RequestHandler = async (
+export async function createDevice(
 	req: Request,
 	res: Response,
 	next: NextFunction,
-): Promise<void> => {
+): Promise<void> {
 	try {
-		const deviceData = req.body;
-
-		if (deviceData.uuid == null) {
-			deviceData.uuid = Math.floor(Math.random() * 1_000_000_000);
-		}
-		if (!deviceData.image) {
-			deviceData.image = "images/unknown.jpg";
-		}
-
-		const createdDevice = await deviceService.createDevice(deviceData);
+		const createdDevice = await createDeviceService(req.body);
 		res.status(201).json({ data: createdDevice });
 	} catch (error) {
+		if (error instanceof Error) {
+			res.status(400).json({ message: error.message });
+			return;
+		}
 		next(error);
 	}
-};
+}
 
-export const updateDevice: RequestHandler = async (
+export async function updateDevice(
 	req: Request,
 	res: Response,
 	next: NextFunction,
-): Promise<void> => {
+): Promise<void> {
 	try {
 		const { id } = req.params;
-		const updatedDevice = await deviceService.updateDevice(id, req.body);
-
+		const updatedDevice = await updateDeviceService(id, req.body);
 		if (!updatedDevice) {
 			res.status(404).json({ message: "Device not found" });
 			return;
 		}
-
 		res.json({ data: updatedDevice });
 	} catch (error) {
+		if (error instanceof Error) {
+			res.status(400).json({ message: error.message });
+			return;
+		}
 		next(error);
 	}
-};
+}
 
-export const deleteDevice: RequestHandler = async (
+export async function deleteDevice(
 	req: Request,
 	res: Response,
 	next: NextFunction,
-): Promise<void> => {
+): Promise<void> {
 	try {
 		const { id } = req.params;
-		const deletedDevice = await deviceService.deleteDevice(id);
-
+		const deletedDevice = await deleteDeviceService(id);
 		if (!deletedDevice) {
 			res.status(404).json({ message: "Device not found" });
 			return;
 		}
-
 		res.json({ message: "Device deleted" });
 	} catch (error) {
 		next(error);
 	}
-};
+}
 
-export const seedDevices: RequestHandler = async (
-	req: Request,
+export async function seedDevices(
+	_req: Request,
 	res: Response,
 	next: NextFunction,
-): Promise<void> => {
+): Promise<void> {
 	try {
-		const insertedDevices = await deviceService.insertDevices();
+		const insertedDevices = await seedDevicesService();
 		res.json({ message: "Database seeded", data: insertedDevices });
 	} catch (error) {
 		next(error);
 	}
-};
+}

@@ -33,7 +33,6 @@ const universalFields = [
 	"rating",
 	"inStock",
 ];
-
 const fieldTranslations: Record<string, string> = {
 	image: "Зображення",
 	title: "Назва",
@@ -74,8 +73,6 @@ function getUniversalValue(prod: IProduct, field: string): unknown {
 function renderTableCellContent(
 	field: string,
 	val: unknown,
-	isBest: boolean,
-	colStyle: React.CSSProperties,
 	product: IProduct,
 ) {
 	if (field === "image") {
@@ -84,11 +81,7 @@ function renderTableCellContent(
 			<img
 				src={imgUrl}
 				alt={product.title}
-				style={{
-					maxWidth: "100px",
-					maxHeight: "100px",
-					objectFit: "contain",
-				}}
+				style={{ maxWidth: "100px", maxHeight: "100px", objectFit: "contain" }}
 			/>
 		) : (
 			"-"
@@ -169,7 +162,6 @@ const CompareTable: React.FC<CompareTableProps> = ({
 	products.forEach((p) => {
 		if (p.uuid) winsCount[p.uuid] = 0;
 	});
-
 	fieldList.forEach((field) => {
 		const best = bestValues[field];
 		if (best !== undefined) {
@@ -348,7 +340,7 @@ const CompareTable: React.FC<CompareTableProps> = ({
 												whiteSpace: "nowrap",
 											}}
 										>
-											{renderTableCellContent(field, val, isBest, colStyle, p)}
+											{renderTableCellContent(field, val, p)}
 										</TableCell>
 									);
 								})}

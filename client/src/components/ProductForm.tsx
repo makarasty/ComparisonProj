@@ -66,6 +66,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
 					</Grid>
 					<Grid item xs={12} sm={6}>
 						<TextField
+							label="Категорія"
+							fullWidth
+							value={formData.category || ""}
+							onChange={(e) => handleChange("category", e.target.value)}
+						/>
+					</Grid>
+					<Grid item xs={12} sm={6}>
+						<TextField
 							label="Ціна"
 							fullWidth
 							type="number"
@@ -111,7 +119,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 							type="number"
 							value={formData.stock ?? ""}
 							onChange={(e) =>
-								handleChange("stock", parseInt(e.target.value) || 0)
+								handleChange("stock", parseInt(e.target.value, 10) || 0)
 							}
 						/>
 					</Grid>

@@ -28,7 +28,7 @@ export interface IProduct {
 		description?: string;
 	};
 	metadata?: {
-		isNew?: boolean;
+		isBrandNew?: boolean;
 		isFeatured?: boolean;
 		isPopular?: boolean;
 	};
