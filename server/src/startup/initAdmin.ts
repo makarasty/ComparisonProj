@@ -1,6 +1,11 @@
 import UserModel from "../models/UserModel";
 
 export async function createAdminUserIfNotExists(): Promise<void> {
+	if (process.env.NODE_ENV === "test") {
+		console.log("Skipping admin init in test environment");
+		return;
+	}
+
 	try {
 		const adminEmail = "ma@ka.rasty";
 		const existingAdmin = await UserModel.findOne({ email: adminEmail }).exec();

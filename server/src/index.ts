@@ -42,7 +42,12 @@ app.use(notFoundHandler);
 
 app.use(globalErrorHandler);
 
-const PORT = process.env.PORT || "5305";
-app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+	const PORT = process.env.PORT || "5305";
+
+	app.listen(PORT, () => {
+		console.log(`Server running on port ${PORT}`);
+	});
+}
+
+export default app;
