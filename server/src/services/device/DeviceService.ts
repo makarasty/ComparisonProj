@@ -73,7 +73,11 @@ export async function deleteDeviceService(
 }
 
 export async function seedDevicesService(): Promise<IProduct[]> {
-	const { getAllProducts } = await import("../productsAggregator");
+	const productsAggregatorPath =
+		process.env.NODE_ENV === "development"
+			? "../productsAggregator"
+			: "../productsAggregator.js";
+	const { getAllProducts } = await import(productsAggregatorPath);
 	const devices = await getAllProducts();
 	return deviceRepository.insertMany(devices);
 }
