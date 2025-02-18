@@ -1,5 +1,5 @@
 import { fetchJSON } from "../helpers/fetchJSON";
-import { IProduct } from "../../interfaces/Product";
+import { IProduct } from "../../interfaces/IProduct";
 
 interface DummyJsonCategoryResponse {
 	products: DummyJsonProduct[];
@@ -29,7 +29,7 @@ const AVAILABLE_CATEGORIES = [
 	"vehicle",
 ] as const;
 
-type ProductCategory = (typeof AVAILABLE_CATEGORIES)[number];
+export type ProductCategory = (typeof AVAILABLE_CATEGORIES)[number];
 
 export async function getDummyJsonProductsByCategory(
 	category: ProductCategory,

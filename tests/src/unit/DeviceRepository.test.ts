@@ -1,6 +1,6 @@
 import DeviceRepository from "@server/repositories/DeviceRepository";
 import DeviceModel from "@server/models/DeviceModel";
-import { IProduct } from "@server/interfaces/Product";
+import { IProduct } from "@server/interfaces/IProduct";
 
 // Мокаем модель
 jest.mock("@server/models/DeviceModel");

@@ -1,5 +1,5 @@
 import { fetchJSON } from "../helpers/fetchJSON";
-import { IProduct } from "../../interfaces/Product";
+import { IProduct } from "../../interfaces/IProduct";
 
 type FakeStoreProduct = {
 	id: number;
@@ -16,7 +16,7 @@ type FakeStoreProduct = {
 
 const FAKE_STORE_CATEGORIES = ["electronics"] as const;
 
-type FakeStoreCategory = (typeof FAKE_STORE_CATEGORIES)[number];
+export type FakeStoreCategory = (typeof FAKE_STORE_CATEGORIES)[number];
 
 export async function getFakeStoreProductsByCategory(
 	category: FakeStoreCategory,

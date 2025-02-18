@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import mongoose, { Types } from "mongoose";
-import userRepository from "../../repositories/UserRepository";
+import userRepository from "../repositories/UserRepository";
 
 export function generateAuthToken(
 	userId: Types.ObjectId,

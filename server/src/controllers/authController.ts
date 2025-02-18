@@ -1,9 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { registerSchema, loginSchema } from "../validators/AuthValidators";
-import {
-	registerUserService,
-	loginUserService,
-} from "../services/auth/AuthService";
+import { registerUserService, loginUserService } from "../services/AuthService";
 
 interface ILoginResponse {
 	message: string;

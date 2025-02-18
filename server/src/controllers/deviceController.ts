@@ -1,12 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import {
-	getAllDevicesService,
-	getDeviceByIdService,
-	createDeviceService,
-	updateDeviceService,
-	deleteDeviceService,
-	seedDevicesService,
-} from "../services/device/DeviceService";
+import { DeviceService } from "../services/DeviceService";
 
 export async function getDevices(
 	_req: Request,
@@ -14,7 +7,7 @@ export async function getDevices(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const devices = await getAllDevicesService();
+		const devices = await DeviceService.getAllDevices();
 		res.json({ data: devices });
 	} catch (error) {
 		next(error);
@@ -28,7 +21,7 @@ export async function getDeviceById(
 ): Promise<void> {
 	try {
 		const { id } = req.params;
-		const device = await getDeviceByIdService(id);
+		const device = await DeviceService.getDeviceById(id);
 		if (!device) {
 			res.status(404).json({ message: "Device not found" });
 			return;
@@ -45,7 +38,7 @@ export async function createDevice(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const createdDevice = await createDeviceService(req.body);
+		const createdDevice = await DeviceService.createDevice(req.body);
 		res.status(201).json({ data: createdDevice });
 	} catch (error) {
 		if (error instanceof Error) {
@@ -63,7 +56,7 @@ export async function updateDevice(
 ): Promise<void> {
 	try {
 		const { id } = req.params;
-		const updatedDevice = await updateDeviceService(id, req.body);
+		const updatedDevice = await DeviceService.updateDevice(id, req.body);
 		if (!updatedDevice) {
 			res.status(404).json({ message: "Device not found" });
 			return;
@@ -85,7 +78,7 @@ export async function deleteDevice(
 ): Promise<void> {
 	try {
 		const { id } = req.params;
-		const deletedDevice = await deleteDeviceService(id);
+		const deletedDevice = await DeviceService.deleteDevice(id);
 		if (!deletedDevice) {
 			res.status(404).json({ message: "Device not found" });
 			return;
@@ -102,7 +95,7 @@ export async function seedDevices(
 	next: NextFunction,
 ): Promise<void> {
 	try {
-		const insertedDevices = await seedDevicesService();
+		const insertedDevices = await DeviceService.seedDevices();
 		res.json({ message: "Database seeded", data: insertedDevices });
 	} catch (error) {
 		next(error);

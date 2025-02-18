@@ -1,5 +1,5 @@
 import DeviceModel from "../models/DeviceModel";
-import { IProduct } from "../interfaces/Product";
+import { IProduct } from "../interfaces/IProduct";
 
 class DeviceRepository {
 	async findAll(): Promise<IProduct[]> {
