@@ -2,33 +2,19 @@
 chcp 65001 > nul
 setlocal
 
-rem Перевірка наявності Node.js
-where node >nul 2>&1
+echo Виконую перевірку середовища розробки...
+call check_env.bat
 if %errorlevel% neq 0 (
     echo.
-    echo Помилка: Node.js не встановлено або не додано до PATH.
-    echo Будь ласка, встановіть Node.js з https://nodejs.org/
+    echo Перевірка середовища завершилася з помилкою. Виконання скрипта зупинено.
     pause
-    exit /b 1
+    exit /b %errorlevel%
 )
-
-rem Перевірка наявності npm
-where npm >nul 2>&1
-if %errorlevel% neq 0 (
-    echo.
-    echo Помилка: npm не встановлено або не додано до PATH.
-    echo Зазвичай npm встановлюється разом з Node.js. Перевстановіть Node.js або перевірте його інсталяцію.
-    pause
-    exit /b 1
-)
-
 echo.
-echo Node.js та npm успішно перевірено. Продовжую встановлення залежностей.
+echo Перевірка середовища успішно завершена.
 
-rem Список директорій для встановлення залежностей
 set "PROJECT_DIRS=client server tests"
 
-rem Цикл для кожної директорії
 for %%d in (%PROJECT_DIRS%) do (
     echo.
     echo Переходжу до директорії "%%d" та запускаю "npm install"...

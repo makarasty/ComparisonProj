@@ -3,12 +3,15 @@ import DeviceModel from "@server/models/DeviceModel";
 import { IProduct } from "@server/interfaces/IProduct";
 
 // Мокаем модель
+
+const superMockId = "mock-id";
+type databaseProduct = IProduct & { _id: string };
+
 jest.mock("@server/models/DeviceModel");
 
 describe("DeviceRepository - Unit tests", () => {
-	const mockDevice: IProduct = {
-		//@ts-expect-error
-		_id: "mock-id",
+	const mockDevice: databaseProduct = {
+		_id: superMockId,
 		uuid: 12345,
 		title: "Mock Device",
 		description: "Some description",
@@ -43,7 +46,7 @@ describe("DeviceRepository - Unit tests", () => {
 			exec: jest.fn().mockResolvedValue(mockDevice),
 		});
 
-		const result = await DeviceRepository.findById("mock-id");
+		const result = await DeviceRepository.findById(superMockId);
 		expect(result?.title).toBe("Mock Device");
 	});
 
@@ -52,9 +55,11 @@ describe("DeviceRepository - Unit tests", () => {
 			save: jest.fn().mockResolvedValue(mockDevice),
 		}));
 
-		const created = await DeviceRepository.create(mockDevice);
-		//@ts-expect-error
-		expect(created._id).toBe("mock-id");
+		const created = (await DeviceRepository.create(
+			mockDevice,
+		)) as databaseProduct;
+
+		expect(created._id).toBe(superMockId);
 		expect(DeviceModel).toHaveBeenCalledWith(mockDevice);
 	});
 
@@ -63,7 +68,7 @@ describe("DeviceRepository - Unit tests", () => {
 			exec: jest.fn().mockResolvedValue({ ...mockDevice, title: "Updated" }),
 		});
 
-		const result = await DeviceRepository.update("mock-id", {
+		const result = await DeviceRepository.update(superMockId, {
 			title: "Updated",
 		});
 		expect(result?.title).toBe("Updated");
@@ -74,7 +79,7 @@ describe("DeviceRepository - Unit tests", () => {
 			exec: jest.fn().mockResolvedValue(mockDevice),
 		});
 
-		const result = await DeviceRepository.delete("mock-id");
+		const result = await DeviceRepository.delete(superMockId);
 		expect(result?.title).toBe("Mock Device");
 	});
 });
