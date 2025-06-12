@@ -1,1 +1,0 @@
-start "MongoDBIsTheBest" "D:\MongoDB\bin\mongod.exe" --dbpath "D:\MongoDB\bin\Data"
