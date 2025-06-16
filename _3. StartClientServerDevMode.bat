@@ -1,71 +1,71 @@
 @echo off
-chcp 65001 > nul
+chcp 1251 > nul
 setlocal enabledelayedexpansion
 
-echo РџРѕС‚РѕС‡РЅР° РґРёСЂРµРєС‚РѕСЂС–СЏ: %CD%
+echo Поточна директорія: %CD%
 echo.
 
-echo Р’РёРєРѕРЅСѓСЋ РїРµСЂРµРІС–СЂРєСѓ СЃРµСЂРµРґРѕРІРёС‰Р° СЂРѕР·СЂРѕР±РєРё...
+echo Виконую перевірку середовища розробки...
 call check_env.bat
 if errorlevel 1 (
-    echo РџРµСЂРµРІС–СЂРєР° СЃРµСЂРµРґРѕРІРёС‰Р° Р·Р°РІРµСЂС€РёР»Р°СЃСЏ Р· РїРѕРјРёР»РєРѕСЋ.
+    echo Перевірка середовища завершилася з помилкою.
     pause
     exit /b 1
 )
-echo РџРµСЂРµРІС–СЂРєР° СЃРµСЂРµРґРѕРІРёС‰Р° СѓСЃРїС–С€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.
+echo Перевірка середовища успішно завершена.
 echo.
 
-echo Р’РёРєРѕРЅСѓСЋ РїРµСЂРµРІС–СЂРєСѓ MongoDB...
+echo Виконую перевірку MongoDB...
 call check_mongo.bat
 if errorlevel 1 (
-    echo РџРµСЂРµРІС–СЂРєР° MongoDB Р·Р°РІРµСЂС€РёР»Р°СЃСЏ Р· РїРѕРјРёР»РєРѕСЋ.
+    echo Перевірка MongoDB завершилася з помилкою.
     pause
     exit /b 1
 )
-echo РџРµСЂРµРІС–СЂРєР° MongoDB СѓСЃРїС–С€РЅРѕ Р·Р°РІРµСЂС€РµРЅР°.
+echo Перевірка MongoDB успішно завершена.
 echo.
 
-echo РџРµСЂРµРІС–СЂСЏСЋ РЅР°СЏРІРЅС–СЃС‚СЊ РґРёСЂРµРєС‚РѕСЂС–Р№ РїСЂРѕРµРєС‚Сѓ...
+echo Перевіряю наявність директорій проекту...
 if not exist "client" (
-    echo РџРѕРјРёР»РєР°: Р”РёСЂРµРєС‚РѕСЂС–СЏ "client" РЅРµ Р·РЅР°Р№РґРµРЅР°!
+    echo Помилка: Директорія "client" не знайдена!
     pause
     exit /b 1
 )
 if not exist "server" (
-    echo РџРѕРјРёР»РєР°: Р”РёСЂРµРєС‚РѕСЂС–СЏ "server" РЅРµ Р·РЅР°Р№РґРµРЅР°!
+    echo Помилка: Директорія "server" не знайдена!
     pause
     exit /b 1
 )
-echo Р”РёСЂРµРєС‚РѕСЂС–С— "client" С‚Р° "server" Р·РЅР°Р№РґРµРЅС–.
+echo Директорії "client" та "server" знайдені.
 echo.
 
-echo РџРµСЂРµРІС–СЂСЏСЋ node_modules Сѓ client...
+echo Перевіряю node_modules у client...
 if not exist "client\node_modules" (
-    echo РџРѕРјРёР»РєР°: node_modules РІС–РґСЃСѓС‚РЅСЏ Сѓ client. Р’РёРєРѕРЅР°Р№С‚Рµ "npm install" Сѓ РґРёСЂРµРєС‚РѕСЂС–С— client.
+    echo Помилка: node_modules відсутня у client. Виконайте "npm install" у директорії client.
     pause
     exit /b 1
 )
-echo node_modules Р·РЅР°Р№РґРµРЅРѕ Сѓ client.
+echo node_modules знайдено у client.
 
-echo РџРµСЂРµРІС–СЂСЏСЋ node_modules Сѓ server...
+echo Перевіряю node_modules у server...
 if not exist "server\node_modules" (
-    echo РџРѕРјРёР»РєР°: node_modules РІС–РґСЃСѓС‚РЅСЏ Сѓ server. Р’РёРєРѕРЅР°Р№С‚Рµ "npm install" Сѓ РґРёСЂРµРєС‚РѕСЂС–С— server.
+    echo Помилка: node_modules відсутня у server. Виконайте "npm install" у директорії server.
     pause
     exit /b 1
 )
-echo node_modules Р·РЅР°Р№РґРµРЅРѕ Сѓ server.
+echo node_modules знайдено у server.
 echo.
 
-echo Р—Р°РїСѓСЃРєР°СЋ РєР»С–С”РЅС‚СЃСЊРєСѓ С‡Р°СЃС‚РёРЅСѓ...
+echo Запускаю клієнтську частину...
 pushd client
 start "Client" cmd /k "npm run dev"
 popd
 
-echo Р—Р°РїСѓСЃРєР°СЋ СЃРµСЂРІРµСЂРЅСѓ С‡Р°СЃС‚РёРЅСѓ...
+echo Запускаю серверну частину...
 pushd server
 start "Server" cmd /k "npm run dev"
 popd
 
 echo.
-echo РћР±РёРґРІС– С‡Р°СЃС‚РёРЅРё Р·Р°СЃС‚РѕСЃСѓРЅРєСѓ Р·Р°РїСѓС‰РµРЅС–.
+echo Обидві частини застосунку запущені.
 pause
