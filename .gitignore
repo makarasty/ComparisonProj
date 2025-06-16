@@ -2,7 +2,7 @@ LICENSE
 package-lock.json
 
 *.docx
-*.env
+#*.env
 
 mongo/data
 
