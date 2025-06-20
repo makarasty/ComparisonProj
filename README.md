@@ -1,4 +1,7 @@
 # Веб-додаток для порівняння товарів
+![image](https://github.com/user-attachments/assets/262010fc-683d-4176-8510-bc8827b6b85a)
+![image](https://github.com/user-attachments/assets/3fc383ce-6457-4a51-91fe-c2559ac1daf5)
+![image](https://github.com/user-attachments/assets/60d0e1d3-6693-460b-a99d-c712f6124aed)
 
 ## 📁 Структура проекту
 
